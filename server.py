@@ -9,20 +9,25 @@ from Racer import Racer
 
 class Server:
     def __init__(self):
-        self._status = State.ConnectingToClients
+        self._status = State.WaitingForCountDown
         self._startClientConnected = False
         self._finishClientConnected = False
+        self._startClientId = None
+        self._finishClientId = None
         self._racers = [Racer("P1", 1, 1, 1), Racer("P2", 2, 2, 2)]
 
-    def checkIfNewClient(self, data):
-        if data.startswith("StartClient") and not self._startClientConnected:
+    def bothClientsConnected(self):
+        return (self._startClientConnected and self._finishClientConnected)
+
+    def checkIfNewClient(self, data, id):
+        if ("StartClient" in data) and (not self._startClientConnected):
             self._startClientConnected = True
+            self._startClientId = id
             print("StartClient Connected")
-        elif data.startswith("FinishClient") and not self._finishClientConnected:
+        elif ("FinishClient" in data) and (not self._finishClientConnected):
             self._finishClientConnected = True
+            self._finishClientId = id
             print("FinishClient Connected")
-        if (self._startClientConnected and self._finishClientConnected):
-            self._status = State.WaitingForCountDown
 
     def endRaceIfNeeded(self):
         endRace = []
@@ -46,10 +51,8 @@ class Server:
             print(racer.printResult())
         self.endRaceIfNeeded()
 
-    def processReceivedData(self, data):
-        if self._status == State.ConnectingToClients:
-            self.checkIfNewClient(str(data))
-        elif self._status == State.CountingDown:
+    def processReceivedData(self, data, id):
+        if self._status == State.CountingDown:
             if (data.startswith("p1StartClient")):
                 self.processFalseStart(data, self._racers[0])
             elif (data.startswith("p2StartClient")):
@@ -60,15 +63,23 @@ class Server:
             elif (data.startswith("p2FinishClient")):
                 self.processEndTime(data, self._racers[1])
 
-    def multi_threaded_client(self, connection):
+    def multi_threaded_client(self, connection, id):
         while True:
-            data = connection.recv(1024).decode()
-            #if not data:
-                # if data is not received break
-            #    break
-            self.processReceivedData(data)
-            data = "Thanks for data"
-            connection.send(data.encode())  # send Thanks for data to the client
+            try:
+                data = connection.recv(1024).decode()
+                if not (self.bothClientsConnected()):
+                    self.checkIfNewClient(str(data), id)
+                self.processReceivedData(data, id)
+                data = "Thanks for data"
+                connection.send(data.encode())  # send Thanks for data to the client
+            except:
+                if (id == self._startClientId):
+                    self._startClientConnected = False
+                    print("Connectie met startClient verloren")
+                elif (id == self._finishClientId):
+                    self._finishClientConnected = False
+                    print("Connectie met finishClient verloren")
+                break
         connection.close()
 
     def countdown(self, t):
@@ -84,13 +95,14 @@ class Server:
                     if not (racer.getFalseStart()):
                         racer._light.turnOn(Color.Orange)
 
-    def server_program(self):
-        self._status = State.ConnectingToClients
-        self._p1StartClientConnected = self._p2StartClientConnected = self._p1FinishClientConnected = self._p2FinishClientConnected = False
+    def repairConnection(self, server_socket):
+        conn, address = server_socket.accept()  # accept new connection
+        start_new_thread(self.multi_threaded_client, (conn, address[1], ))
+
+    def keepSteadyConnection(self):
         # get the hostname
         host = socket.gethostname()
         port = 5000  # initiate port no above 1024
-        ThreadCount = 0
 
         server_socket = socket.socket()  # get instance
         # look closely. The bind() function takes tuple as argument
@@ -98,18 +110,23 @@ class Server:
 
         # configure how many clients the server can listen simultaneously
         server_socket.listen(2)
-        while ThreadCount < 2 :
-            conn, address = server_socket.accept()  # accept new connection
-            start_new_thread(self.multi_threaded_client, (conn, ))
-            ThreadCount += 1
+        while True:
+            if not self.bothClientsConnected():
+                self.repairConnection(server_socket)
+
+    def server_program(self):
+        start_new_thread(self.keepSteadyConnection, ())
 
         while True:
+            while not self.bothClientsConnected():
+                print("Waiting for connection with clients")
+                time.sleep(5)
             time.sleep(1)
             for racer in self._racers:
                 racer.reset()
             print ("\nNieuwe race gestart!")
             self._status = State.WaitingForCountDown
-            input("Drup op enter om de countdown te beginnen...")
+            input("Drup op enter om de countdown te beginnen...\n")
             self._status = State.CountingDown
             self.countdown(3)
             if (not self._status == State.RaceFinished):
@@ -121,9 +138,9 @@ class Server:
                     racer.setStartTime(startTime)
                 print("Starttijd: " + datetime.datetime.fromtimestamp(time.time()).ctime())
 
-            while not self._status == State.RaceFinished:
+            while (not self._status == State.RaceFinished):
                 time.sleep(1)
-            input("Drup op enter om een nieuwe race te starten...")
+            input("Drup op enter om een nieuwe race te starten...\n")
 
         conn.close()  # close the connection
 
