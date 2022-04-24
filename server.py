@@ -10,26 +10,18 @@ from Racer import Racer
 class Server:
     def __init__(self):
         self._status = State.ConnectingToClients
-        self._p1StartClientConnected = False
-        self._p2StartClientConnected = False
-        self._p1FinishClientConnected = False
-        self._p2FinishClientConnected = False
+        self._startClientConnected = False
+        self._finishClientConnected = False
         self._racers = [Racer("P1", 1, 1, 1), Racer("P2", 2, 2, 2)]
 
     def checkIfNewClient(self, data):
-        if data.startswith("p1StartClient") and not self._p1StartClientConnected:
-            self._p1StartClientConnected = True
-            print("p1StartClient Connected")
-        elif data.startswith("p2StartClient") and not self._p2StartClientConnected:
-            self._p2StartClientConnected = True
-            print("p2StartClient Connected")
-        elif data.startswith("p1FinishClient") and not self._p1FinishClientConnected:
-            self._p1FinishClientConnected = True
-            print("p1FinishClient Connected")
-        elif data.startswith("p2FinishClient") and not self._p2FinishClientConnected:
-            self._p2FinishClientConnected = True
-            print("p2FinishClient Connected")
-        if (self._p1StartClientConnected and self._p2StartClientConnected and self._p1FinishClientConnected and self._p2FinishClientConnected):
+        if data.startswith("StartClient") and not self._startClientConnected:
+            self._startClientConnected = True
+            print("StartClient Connected")
+        elif data.startswith("FinishClient") and not self._finishClientConnected:
+            self._finishClientConnected = True
+            print("FinishClient Connected")
+        if (self._startClientConnected and self._finishClientConnected):
             self._status = State.WaitingForCountDown
 
     def endRaceIfNeeded(self):
@@ -105,8 +97,8 @@ class Server:
         server_socket.bind((host, port))  # bind host address and port together
 
         # configure how many clients the server can listen simultaneously
-        server_socket.listen(4)
-        while ThreadCount <= 3 :
+        server_socket.listen(2)
+        while ThreadCount < 2 :
             conn, address = server_socket.accept()  # accept new connection
             start_new_thread(self.multi_threaded_client, (conn, ))
             ThreadCount += 1

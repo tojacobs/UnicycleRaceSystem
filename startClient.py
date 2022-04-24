@@ -11,7 +11,7 @@ def client_program():
     client_socket = socket.socket()  # instantiate
     client_socket.connect((host, port))  # connect to the server
 
-    clientName = "p2FinishClient"
+    clientName = "StartClient"
     message = clientName
 
     while True:
@@ -19,8 +19,8 @@ def client_program():
         data = client_socket.recv(1024).decode()  # receive response
 
         #print('Received from server: ' + data)  # show in terminal
-        input("Drup op enter om een sensor signaal te simuleren...")
-        message = clientName + ":" + current_milli_time()  # again take input
+        racer = input("Enter 1 of 2 om voor p1 of p2 een sensor signaal te simuleren...")
+        message = "p" + racer + clientName + ":" + current_milli_time()  # again take input
 
     client_socket.close()  # close the connection
 
