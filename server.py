@@ -51,7 +51,7 @@ class Server:
             print(racer.printResult())
         self.endRaceIfNeeded()
 
-    def processReceivedData(self, data, id):
+    def processReceivedData(self, data):
         if self._status == State.CountingDown:
             if (data.startswith("p1StartClient")):
                 self.processFalseStart(data, self._racers[0])
@@ -69,7 +69,7 @@ class Server:
                 data = connection.recv(1024).decode()
                 if not (self.bothClientsConnected()):
                     self.checkIfNewClient(str(data), id)
-                self.processReceivedData(data, id)
+                self.processReceivedData(data)
                 data = "Thanks for data"
                 connection.send(data.encode())  # send Thanks for data to the client
             except:
@@ -118,10 +118,10 @@ class Server:
         start_new_thread(self.keepSteadyConnection, ())
 
         while True:
+            time.sleep(1)
             while not self.bothClientsConnected():
                 print("Waiting for connection with clients")
-                time.sleep(5)
-            time.sleep(1)
+                time.sleep(2)
             for racer in self._racers:
                 racer.reset()
             print ("\nNieuwe race gestart!")
