@@ -29,7 +29,6 @@ In startClient.py en finishClient.py:
 1. Op regel 83 t/m 87 zie je de volgende code:
     GPIO.setup(2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    # Gebruik een interrupt, wanneer actief run subroutinne 'gedrukt'
     GPIO.add_event_detect(2, GPIO.RISING, callback=singal_found_p1, bouncetime=200)
     GPIO.add_event_detect(3, GPIO.RISING, callback=singal_found_p2, bouncetime=200)
    Vervang de 2 voor de GPIO pin die gebruikt wordt voor racer p1 en de 3 voor racer p2
