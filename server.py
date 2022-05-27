@@ -14,7 +14,7 @@ class Server:
         self._finishClientConnected = False
         self._startClientId = None
         self._finishClientId = None
-        self._racers = [Racer("P1", 1, 1, 1), Racer("P2", 2, 2, 2)]
+        self._racers = [Racer("P1", 17, 27, 22), Racer("P2", 23, 24, 25)]
         self._answer = ""
         self._countdown = 3
         self._orangeLightAt = 1
@@ -96,6 +96,7 @@ class Server:
                 for racer in self._racers:
                     if not (racer.getFalseStart()):
                         racer._light.turnOn(Color.Orange)
+                        racer._light.turnOff(Color.Red)
 
     def repairConnection(self, server_socket):
         conn, address = server_socket.accept()  # accept new connection
@@ -103,9 +104,10 @@ class Server:
 
     def keepSteadyConnection(self):
         # get the hostname
-        host = socket.gethostname()
+        host = "192.168.1.173" #socket.gethostname()
         port = 5000  # initiate port no above 1024
         server_socket = socket.socket()  # get instance
+        server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1) #Allows the socket to forcibly bind to a port in use by another socket
         
         # try to execute bind function, if it fails shut down the program
         try:

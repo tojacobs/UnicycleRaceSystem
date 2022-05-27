@@ -27,7 +27,7 @@ def client_program():
     global connected, p2time, p1time
     p1time = p2time = None
     connected = False
-    host = "192.168.178.65"  # Fill in server's ip adress
+    host = "192.168.1.173"  # Fill in server's ip adress
     port = 5000  # socket server port number
     connected = False
 

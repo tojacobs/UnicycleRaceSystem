@@ -48,4 +48,4 @@ class TrafficLight:
             now = int(time.time()*5)
             clock = bool(now%2)
             for color in Color:
-                GPIO.output(self._gpio[color],self._status[color] and (not self._blinkingActive or clock))
+                GPIO.output(self._gpio[color],not(self._status[color] and (not self._blinkingActive or clock)))
