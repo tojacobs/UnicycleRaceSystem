@@ -3,49 +3,73 @@ import RPi.GPIO as GPIO
 import time
 from _thread import *
 
-
 class Color(enum.IntEnum):
-    Red = 0
-    Orange = 1
-    Green = 2
+    Red = 1
+    Orange = 2
+    Green = 3
 
 class TrafficLight:
     def __init__(self, GPIORed, GPIOOrange, GPIOGreen):
-        self._gpio = [GPIORed,GPIOOrange,GPIOGreen]
-        self.setupGPIO()   
-        self._status = [False,False,False]
+        self._gpio = {
+            Color.Red : GPIORed,
+            Color.Orange: GPIOOrange,
+            Color.Green: GPIOGreen
+        }
+        self._colorStatus =	{
+            Color.Red : False,
+            Color.Orange: False,
+            Color.Green: False
+        }
         self._blinkingActive = False
-        start_new_thread(self.light_program,())
+        self._threadActive = False
+        self._blinkingSpeedInSec = 1
+        self.setupGPIO()
 
     def __del__(self):
         self.cleanUpGPIO()
+        self._blinkingActive = False
 
     def setupGPIO(self):
         GPIO.setmode(GPIO.BCM)
-        for output in self._gpio:
+        for output in self._gpio.values():
             GPIO.setup(output, GPIO.OUT)
 
     def cleanUpGPIO(self):
         GPIO.cleanup()
 
     def turnOn(self, color):
-        print("licht aan p" + str() + " kleur " + str(color))
-        self._status[color] = True
+        self._colorStatus[color] = True
+        GPIO.output(self._gpio[color], not(self._colorStatus[color]))
+        #print("Set {0} to {1}".format(self._gpio[color], self._colorStatus[color]))
 
     def turnOff(self, color):
-        print("licht uit p" + str(self._gpio[0]) + " kleur " + str(color))
-        self._status[color] = False;
+        self._colorStatus[color] = False
+        GPIO.output(self._gpio[color], not(self._colorStatus[color]))
+        #print("Set {0} to {1}".format(self._gpio[color], self._colorStatus[color]))
 
     def setBlinking(self, blinking):
         self._blinkingActive = blinking
-        if (blinking):
-            print("p " + str(self._gpio[0]) +" Knipperen aan")
-        else:
-            print("p " + str(self._gpio[0]) +" Knipperen uit")
+        if blinking and not self._threadActive:
+            start_new_thread(self.startBlinking,())
+            self._threadActive = True
 
-    def light_program(self):
-        while True:
-            now = int(time.time()*5)
-            clock = bool(now%2)
-            for color in Color:
-                GPIO.output(self._gpio[color],not(self._status[color] and (not self._blinkingActive or clock)))
+    def startBlinking(self):
+        # Create temporary statuses because we don't want to change the original statuses
+        tempColorStatus =	{
+            Color.Red : self._colorStatus[Color.Red],
+            Color.Orange: self._colorStatus[Color.Orange],
+            Color.Green: self._colorStatus[Color.Green]
+        }
+        while self._blinkingActive:
+            for color in self._colorStatus:
+                if self._colorStatus[color]:
+                    tempColorStatus[color] = not(tempColorStatus[color])
+                    GPIO.output(self._gpio[color], not(tempColorStatus[color]))
+                    #print("Set {0} to {1}".format(self._gpio[color], tempColorStatus[color]))
+            time.sleep(self._blinkingSpeedInSec)
+        # Restore original status after blinking is turned off
+        for color in self._colorStatus:
+            if (tempColorStatus[color] != self._colorStatus[color]):
+                GPIO.output(self._gpio[color], not(self._colorStatus[color]))
+                #print("Reseting {0} to {1}".format(self._gpio[color], self._colorStatus[color]))
+        self._threadActive = False
