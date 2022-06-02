@@ -22,6 +22,7 @@ class TrafficLight:
         }
         self._blinkingActive = False
         self._threadActive = False
+        self._blinkingSpeedInSec = 1
         self.setupGPIO()
 
     def __del__(self):
@@ -65,7 +66,7 @@ class TrafficLight:
                     tempColorStatus[color] = not(tempColorStatus[color])
                     GPIO.output(self._gpio[color], not(tempColorStatus[color]))
                     #print("Set {0} to {1}".format(self._gpio[color], tempColorStatus[color]))
-            time.sleep(1)
+            time.sleep(self._blinkingSpeedInSec)
         # Restore original status after blinking is turned off
         for color in self._colorStatus:
             if (tempColorStatus[color] != self._colorStatus[color]):
