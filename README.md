@@ -8,25 +8,29 @@ De volgende bestanden moeten op de stoplicht pi worden gezet op dezelfde locatie
 - state.py
 
 De pi voor valse start detectie:
-- startClient.py
+- client.py
+- client_config.txt
 
 De pi voor finish detectie:
-- finishClient.py
+- client.py
+- client_config.txt
 
+client_config.txt wordt gebruikt door client.py om de configuratie uit te halen en moet in dezelfde directory staan, de file ziet er als volgt uit:
+    [Client]
+    client_type = start
+    gpio_in_p1 = 2
+    gpio_in_p2 = 3
+    server_ip = 192.168.1.173
+- client_type: Zet hier start of finish in zodat client.py weet of hij de valse start detectie of finish detectie is
+- gpio_in_p1:  De gpio pin die wordt gebruikt voor detectie (start of finish) voor P1
+- gpio_in_p2:  De gpio pin die wordt gebruikt voor detectie (start of finish) voor P2
+- server_ip:   Het ip adres van de pi waarop server.py draait
 
-In startClient.py en finishClient.py:
-1. Op regel 83 t/m 87 zie je de volgende code:
-    GPIO.setup(2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(2, GPIO.RISING, callback=singal_found_p1, bouncetime=200)
-    GPIO.add_event_detect(3, GPIO.RISING, callback=singal_found_p2, bouncetime=200)
-   Vervang de 2 voor de GPIO pin die gebruikt wordt voor racer p1 en de 3 voor racer p2
-
-Vervolgens kunnen de server.py, startClient.py en finishClient.py opgestart worden.
+Vervolgens kunnen de server.py, client.py programma's opgestart worden.
 Doe dit als admin anders werken de GPIO's niet. Je kan inloggen als admin door 'sudo su' of 'sudo pi' te typen in de terminal en het wachtwoord voor de admin in te geven.
 Ook kan je 'sudo' voor het uit te voeren commando zetten. Start de programma's vanuit de terminal:
-In de stoplicht pi 'python server.py' hetzelfde geld voor de sndere pi's maar daar is het 'python startClient.py'  en 'python finishClient.py'.
-Volgorde van opstarten maakt niet uit, wel wordt aangeraden bij het afsluiten om eerst de clients af te sluiten (ctr+c) omdat als je eerst de server afsluit je even 1 a 2 minuten moet wachten voor je deze weer kan opstarten.
+In de stoplicht pi 'python server.py' hetzelfde geld voor de andere pi's maar daar is het 'python client.py'.
+Volgorde van opstarten maakt niet uit.
 
 Na het opstarten van server.py zal hij wachten op connectie met de clients, als beide clients connected zijn wordt er een helptekst weergegeven op het scherm met mogelijke commando's vanaf hier moet alles zich vanzelf wijzen.
 
