@@ -28,15 +28,15 @@ class Client:
         GPIO.setup(GPIOP1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(GPIOP2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         # Gebruik een interrupt, wanneer actief run subroutinne 'signal_found_p<player>'
-        GPIO.add_event_detect(GPIOP1, GPIO.RISING, callback=self.singalFoundP1, bouncetime=200)
-        GPIO.add_event_detect(GPIOP2, GPIO.RISING, callback=self.singalFoundP2, bouncetime=200)
+        GPIO.add_event_detect(GPIOP1, GPIO.RISING, callback=self.signalFoundP1, bouncetime=200)
+        GPIO.add_event_detect(GPIOP2, GPIO.RISING, callback=self.signalFoundP2, bouncetime=200)
 
-    def singalFoundP1(self, pin):
+    def signalFoundP1(self, pin):
         if self._p1time is None:
             self._p1time = self.getCurrentMilliTime()
         print("GPIO{} pressed".format(pin))
 
-    def singalFoundP2(self, pin):
+    def signalFoundP2(self, pin):
         if self._p2time is None:
             self._p2time = self.getCurrentMilliTime()
         print("GPIO{} pressed".format(pin))

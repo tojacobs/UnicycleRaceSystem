@@ -1,7 +1,11 @@
 import enum
-import RPi.GPIO as GPIO
 import time
 from _thread import *
+try:
+    import RPi.GPIO as GPIO
+    testMode = False
+except:
+    testMode = True
 
 class Color(enum.IntEnum):
     Red = 1
@@ -23,11 +27,13 @@ class TrafficLight:
         self._blinkingActive = False
         self._threadActive = False
         self._blinkingSpeedInSec = 1
-        self.setupGPIO()
+        if not testMode:
+            self.setupGPIO()
 
     def __del__(self):
-        self.cleanUpGPIO()
         self._blinkingActive = False
+        if not testMode:
+            self.cleanUpGPIO()
 
     def setupGPIO(self):
         GPIO.setmode(GPIO.BCM)
@@ -39,19 +45,30 @@ class TrafficLight:
 
     def turnOn(self, color):
         self._colorStatus[color] = True
-        GPIO.output(self._gpio[color], not(self._colorStatus[color]))
-        #print("Set {0} to {1}".format(self._gpio[color], self._colorStatus[color]))
+        self.setGPIO(color, self._colorStatus[color])
 
     def turnOff(self, color):
         self._colorStatus[color] = False
-        GPIO.output(self._gpio[color], not(self._colorStatus[color]))
-        #print("Set {0} to {1}".format(self._gpio[color], self._colorStatus[color]))
+        self.setGPIO(color, self._colorStatus[color])
 
     def setBlinking(self, blinking):
         self._blinkingActive = blinking
         if blinking and not self._threadActive:
             start_new_thread(self.startBlinking,())
             self._threadActive = True
+
+    def setGPIO(self, color, status):
+        if testMode:
+            print(id(self), end=" ")
+            print(color.name, end=" ")
+            print("to {0}".format(status))
+        else:
+            GPIO.output(self._gpio[color], not(status))
+
+    def restoreLightStatusAfterBlinking(self, tempColorStatus):
+        for color in self._colorStatus:
+            if (tempColorStatus[color] != self._colorStatus[color]):
+                self.setGPIO(color, self._colorStatus[color])
 
     def startBlinking(self):
         # Create temporary statuses because we don't want to change the original statuses
@@ -64,12 +81,7 @@ class TrafficLight:
             for color in self._colorStatus:
                 if self._colorStatus[color]:
                     tempColorStatus[color] = not(tempColorStatus[color])
-                    GPIO.output(self._gpio[color], not(tempColorStatus[color]))
-                    #print("Set {0} to {1}".format(self._gpio[color], tempColorStatus[color]))
+                    self.setGPIO(color, tempColorStatus[color])
             time.sleep(self._blinkingSpeedInSec)
-        # Restore original status after blinking is turned off
-        for color in self._colorStatus:
-            if (tempColorStatus[color] != self._colorStatus[color]):
-                GPIO.output(self._gpio[color], not(self._colorStatus[color]))
-                #print("Reseting {0} to {1}".format(self._gpio[color], self._colorStatus[color]))
+        self.restoreLightStatusAfterBlinking(tempColorStatus)
         self._threadActive = False
