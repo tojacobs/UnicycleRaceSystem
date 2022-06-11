@@ -81,6 +81,7 @@ class Server:
         # configure how many clients the server can listen simultaneously
         server_socket.listen(2)
         while not self._answer == "exit":
+            time.sleep(0.1) # for cpu usage optimization
             if not self.bothClientsConnected():
                 self.repairConnection(server_socket)
 
@@ -90,8 +91,6 @@ class Server:
             self._answer = input()
 
     def waitForClients(self):
-        # added an extra sleep because of port is still busy and enter is pushed twice fast this loop would start and program would be stuck
-        time.sleep(0.1)
         while (not self.bothClientsConnected()) and (not self._answer == "exit"):
             print("Wacht op connectie met beide clients")
             time.sleep(2)
@@ -157,6 +156,7 @@ class Server:
             self.printHelp()
 
         while not self._answer == "exit":
+            time.sleep(0.1) # for cpu usage optimization
             if not self._answer == "":
                 self.processCommand()
 
