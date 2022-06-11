@@ -96,6 +96,7 @@ class Server:
                 for racer in self._racers:
                     if not (racer.getFalseStart()):
                         racer._light.turnOn(Color.Orange)
+                        racer._light.turnOff(Color.Red)
 
     def repairConnection(self, server_socket):
         conn, address = server_socket.accept()  # accept new connection
@@ -106,6 +107,7 @@ class Server:
         host = socket.gethostname()
         port = 5000  # initiate port no above 1024
         server_socket = socket.socket()  # get instance
+        server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1) #Allows the socket to forcibly bind to a port in use by another socket
         
         # try to execute bind function, if it fails shut down the program
         try:
@@ -117,6 +119,7 @@ class Server:
         # configure how many clients the server can listen simultaneously
         server_socket.listen(2)
         while not self._answer == "exit":
+            time.sleep(0.1) # for cpu usage optimization
             if not self.bothClientsConnected():
                 self.repairConnection(server_socket)
 
@@ -126,8 +129,6 @@ class Server:
             self._answer = input()
 
     def waitForClients(self):
-        # added an extra sleep because of port is still busy and enter is pushed twice fast this loop would start and program would be stuck
-        time.sleep(0.1)
         while (not self.bothClientsConnected()) and (not self._answer == "exit"):
             print("Wacht op connectie met beide clients")
             time.sleep(2)
@@ -212,6 +213,7 @@ class Server:
             self.printHelp()
 
         while not self._answer == "exit":
+            time.sleep(0.1) # for cpu usage optimization
             if not self._answer == "":
                 self.processCommand()
 
