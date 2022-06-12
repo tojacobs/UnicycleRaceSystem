@@ -4,7 +4,7 @@ from _thread import *
 import time
 import datetime
 from state import State
-from raceSequence import RaceSequence
+from raceSequence import *
 
 class Server:
     def __init__(self):
@@ -49,8 +49,7 @@ class Server:
                 self.processReceivedData(data)
                 data = "Thanks for data"
                 connection.send(data.encode())  # send Thanks for data to the client
-            except Exception as e:
-                print(e)
+            except:
                 if (id == self._startClientId):
                     self._startClientConnected = False
                     print("Connectie met startClient verloren")
@@ -65,8 +64,13 @@ class Server:
         start_new_thread(self.multi_threaded_client, (conn, address[1], ))
 
     def keepSteadyConnection(self):
-        # get the hostname
-        host = "192.168.1.173" #socket.gethostname()
+        # get the hostname if testmode is active otherwise use real ip
+        # Todo: implement a proper way to get testMode from trafficlight, currently it works because we import everything from raceSequence
+        # which imports everything from trafficLight and testMode is a global in trafficLight
+        if testMode:
+            host = socket.gethostname()
+        else:
+            host = "192.168.1.173"
         port = 5000  # initiate port no above 1024
         server_socket = socket.socket()  # get instance
         server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1) #Allows the socket to forcibly bind to a port in use by another socket

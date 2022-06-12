@@ -9,7 +9,7 @@ class RaceSequence:
         self.status = State.WaitingForCountDown
         self.countdown = 3
         self.orangeLightAt = 1
-        self._racers = [Racer("P1", 17, 27, 22), Racer("P2", 23, 24, 25)]
+        self.racers = [Racer("P1", 17, 27, 22), Racer("P2", 23, 24, 25)]
         self.stop = False
 
     def processEndTime(self, data, racer):
