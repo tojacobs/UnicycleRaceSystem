@@ -3,7 +3,6 @@ import os
 from _thread import *
 import time
 import datetime
-from state import State
 from raceSequence import *
 
 class Server:
@@ -27,18 +26,6 @@ class Server:
             self._finishClientConnected = True
             self._finishClientId = id
             print("FinishClient Connected")
-  
-    def processReceivedData(self, data):
-        if self._raceSequence.status == State.CountingDown:
-            if (data.startswith("p1StartClient")):
-                self._raceSequence.processFalseStart(data, self._raceSequence.racers[0])
-            elif (data.startswith("p2StartClient")):
-                self._raceSequence.processFalseStart(data, self._raceSequence.racers[1])
-        elif self._raceSequence.status == State.RaceStarted:
-            if (data.startswith("p1FinishClient")):
-                self._raceSequence.processEndTime(data, self._raceSequence.racers[0])
-            elif (data.startswith("p2FinishClient")):
-                self._raceSequence.processEndTime(data, self._raceSequence.racers[1])
 
     def multi_threaded_client(self, connection, id):
         while not self._answer == "exit":
@@ -46,7 +33,7 @@ class Server:
                 data = connection.recv(1024).decode()
                 if not (self.bothClientsConnected()):
                     self.checkIfNewClient(str(data), id)
-                self.processReceivedData(data)
+                self._raceSequence.processReceivedData(data)
                 data = "Thanks for data"
                 connection.send(data.encode())  # send Thanks for data to the client
             except:

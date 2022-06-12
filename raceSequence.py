@@ -34,6 +34,18 @@ class RaceSequence:
         print(racer.printResult())
         self.endRaceIfNeeded()
 
+    def processReceivedData(self, data):
+        if self.status == State.CountingDown:
+            if (data.startswith("p1StartClient")):
+                self.processFalseStart(data, self.racers[0])
+            elif (data.startswith("p2StartClient")):
+                self.processFalseStart(data, self.racers[1])
+        elif self.status == State.RaceStarted:
+            if (data.startswith("p1FinishClient")):
+                self.processEndTime(data, self.racers[0])
+            elif (data.startswith("p2FinishClient")):
+                self.processEndTime(data, self.racers[1])
+
     def startCountdown(self, t):
         while t:
             mins, secs = divmod(t, 60)
