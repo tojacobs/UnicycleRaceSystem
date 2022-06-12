@@ -156,8 +156,3 @@ class Server:
                 self.processCommand()
 
         self._raceSequence.stop = True
-
-
-if __name__ == '__main__':
-    server = Server()
-    server.server_program()
