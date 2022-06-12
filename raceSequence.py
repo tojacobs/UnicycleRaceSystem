@@ -12,11 +12,14 @@ class RaceSequence:
         self.racers = [Racer("P1", 17, 27, 22), Racer("P2", 23, 24, 25)]
         self.stop = False
 
+    def setCallbackFunctions(self, displayCallback):
+        self.display = displayCallback
+
     def processEndTime(self, data, racer):
         if not (racer.getFalseStart() or racer.getFinished()):
             data = data.split(':')[1]
             racer.setFinishTime(float(data)/1000)
-            print(racer.printResult())
+            self.display(racer.printResult())
         self.endRaceIfNeeded()
 
     def endRaceIfNeeded(self):
@@ -31,7 +34,7 @@ class RaceSequence:
 
     def processFalseStart(self, data, racer):
         racer.setFalseStart(True)
-        print(racer.printResult())
+        self.display(racer.printResult())
         self.endRaceIfNeeded()
 
     def processReceivedData(self, data):
@@ -50,7 +53,7 @@ class RaceSequence:
         while t:
             mins, secs = divmod(t, 60)
             timer = '{:02d}:{:02d}'.format(mins, secs)
-            print(timer, end="\r")
+            self.display(timer, end="\r")
             time.sleep(1)
             t -= 1
             if (t == self.orangeLightAt):
@@ -64,18 +67,18 @@ class RaceSequence:
         #self.waitForClients()
         for racer in self.racers:
             racer.reset()
-        print("\nNieuwe race gestart! Countdown is begonnen!")
+        self.display("\nNieuwe race gestart! Countdown is begonnen!")
         self.status = State.CountingDown
         self.startCountdown(self.countdown)
         if (not self.status == State.RaceFinished):
             self.status = State.RaceStarted
             startTime = time.time()
-            print('GO!  ')
+            self.display('GO!  ')
             for racer in self.racers:
                 racer.startRace()
                 racer.setStartTime(startTime)
-            print("Starttijd: " + datetime.datetime.fromtimestamp(time.time()).ctime())
+            self.display("Starttijd: " + datetime.datetime.fromtimestamp(time.time()).ctime())
 
         while (not self.status == State.RaceFinished) and (not self.stop):    
             time.sleep(1)
-        print("Race gefinished, type een commando...")
+        self.display("Race gefinished, type een commando...")
