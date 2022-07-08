@@ -3,18 +3,21 @@ import os
 from _thread import *
 import time
 import datetime
-from state import State
 from raceSequence import *
 
 class Server:
-    def __init__(self):
+    def __init__(self, raceSequence):
         self._startClientConnected = False
         self._finishClientConnected = False
         self._startClientId = None
         self._finishClientId = None
         self._answer = ""
-        self._raceSequence = RaceSequence()
-  
+        self._raceSequence = raceSequence
+
+    def setCallbackFunctions(self, receivedDataCallback, displayCallback):
+        self.receivedDataCallback = receivedDataCallback
+        self.display = displayCallback
+
     def bothClientsConnected(self):
         return (self._startClientConnected and self._finishClientConnected)
 
@@ -22,23 +25,11 @@ class Server:
         if ("StartClient" in data) and (not self._startClientConnected):
             self._startClientConnected = True
             self._startClientId = id
-            print("StartClient Connected")
+            self.display("StartClient Connected")
         elif ("FinishClient" in data) and (not self._finishClientConnected):
             self._finishClientConnected = True
             self._finishClientId = id
-            print("FinishClient Connected")
-  
-    def processReceivedData(self, data):
-        if self._raceSequence.status == State.CountingDown:
-            if (data.startswith("p1StartClient")):
-                self._raceSequence.processFalseStart(data, self._raceSequence.racers[0])
-            elif (data.startswith("p2StartClient")):
-                self._raceSequence.processFalseStart(data, self._raceSequence.racers[1])
-        elif self._raceSequence.status == State.RaceStarted:
-            if (data.startswith("p1FinishClient")):
-                self._raceSequence.processEndTime(data, self._raceSequence.racers[0])
-            elif (data.startswith("p2FinishClient")):
-                self._raceSequence.processEndTime(data, self._raceSequence.racers[1])
+            self.display("FinishClient Connected")
 
     def multi_threaded_client(self, connection, id):
         while not self._answer == "exit":
@@ -46,16 +37,16 @@ class Server:
                 data = connection.recv(1024).decode()
                 if not (self.bothClientsConnected()):
                     self.checkIfNewClient(str(data), id)
-                self.processReceivedData(data)
+                self.receivedDataCallback(data)
                 data = "Thanks for data"
                 connection.send(data.encode())  # send Thanks for data to the client
             except:
                 if (id == self._startClientId):
                     self._startClientConnected = False
-                    print("Connectie met startClient verloren")
+                    self.display("Connectie met startClient verloren")
                 elif (id == self._finishClientId):
                     self._finishClientConnected = False
-                    print("Connectie met finishClient verloren")
+                    self.display("Connectie met finishClient verloren")
                 break
         connection.close()
 
@@ -79,7 +70,7 @@ class Server:
         try:
             server_socket.bind((host, port))  # bind host address and port together
         except:
-            print("Poort is nog bezet, wacht 1 a 2 minuten")
+            self.display("Poort is nog bezet, wacht 1 a 2 minuten")
             self._answer = "exit"
 
         # configure how many clients the server can listen simultaneously
@@ -96,7 +87,7 @@ class Server:
 
     def waitForClients(self):
         while (not self.bothClientsConnected()) and (not self._answer == "exit"):
-            print("Wacht op connectie met beide clients")
+            self.display("Wacht op connectie met beide clients")
             time.sleep(2)
 
     def setNames(self):
@@ -165,8 +156,3 @@ class Server:
                 self.processCommand()
 
         self._raceSequence.stop = True
-
-
-if __name__ == '__main__':
-    server = Server()
-    server.server_program()
