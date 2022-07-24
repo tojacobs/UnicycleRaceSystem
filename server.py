@@ -11,9 +11,8 @@ class Server:
         self._finishClientConnected = False
         self._startClientId = None
         self._finishClientId = None
-        self._answer = ""
         self._raceSequence = raceSequence
-        self.stop = False
+        self.exit = False
 
     def setCallbackFunctions(self, receivedDataCallback, displayCallback):
         self.receivedDataCallback = receivedDataCallback
@@ -33,7 +32,7 @@ class Server:
             self.display("FinishClient Connected")
 
     def multi_threaded_client(self, connection, id):
-        while not self._answer == "exit":
+        while not self.exit:
             try:
                 data = connection.recv(1024).decode()
                 if not (self.bothClientsConnected()):
@@ -72,22 +71,17 @@ class Server:
             server_socket.bind((host, port))  # bind host address and port together
         except:
             self.display("Poort is nog bezet, wacht 1 a 2 minuten")
-            self._answer = "exit"
+            self.exit = True
 
         # configure how many clients the server can listen simultaneously
         server_socket.listen(2)
-        while not self._answer == "exit":
+        while not self.exit:
             time.sleep(0.1) # for cpu usage optimization
             if not self.bothClientsConnected():
                 self.repairConnection(server_socket)
 
-    def waitForAnswer(self):
-        while not self._answer == "exit":
-            time.sleep(0.1)
-            self._answer = input()
-
     def waitForClients(self):
-        while (not self.bothClientsConnected()) and (not self._answer == "exit"):
+        while (not self.bothClientsConnected()) and (not self.exit):
             self.display("Wacht op connectie met beide clients")
             time.sleep(2)
 
@@ -96,7 +90,7 @@ class Server:
 
         self.waitForClients()
 
-        while not self.stop:
+        while not self.exit:
             time.sleep(0.1) # for cpu usage optimization
 
         

@@ -1,3 +1,4 @@
+from doctest import TestResults
 import time
 from Racer import Racer
 from raceSequence import RaceSequence
@@ -11,12 +12,16 @@ class TerminalUI(UserInterface):
         self._server = server
         self._raceSequence = raceSequence
         self._answer = ""
+        self.exit = False
 
     def displayText(self,text:str):
         print(text,end="\n")
 
+    def setExitCommandCallback(self, Callback):
+        self.exitCallback = Callback
+
     def waitForAnswer(self):
-        while not self._answer == "exit":
+        while not self.exit:
             time.sleep(0.1)
             self._answer = input()
 
@@ -63,6 +68,7 @@ class TerminalUI(UserInterface):
             self.printHelp()
         elif self._answer == "exit":
             print("poging tot programma afsluiten, mocht dit niet werken dan programma sluiten met Ctrl+c")
+            self.exitCallback()
         else:
             print("type een geldig commando of type 'help'")
         self._answer = ""
@@ -73,12 +79,14 @@ class TerminalUI(UserInterface):
     def start(self):
         start_new_thread(self.waitForAnswer, ())
 
-        while not self._server.bothClientsConnected():
+        while not self._server.bothClientsConnected() and not self.exit:
+            if self._answer == "exit":
+                self.exitCallback()
             time.sleep(0.1)
             
-        if not self._answer == "exit":
+        if not self.exit:
             self.printHelp()
-        while not self._answer == "exit":
+        while not self.exit:
             time.sleep(0.1) # for cpu usage optimization
             if not self._answer == "":
                 self.processCommand()

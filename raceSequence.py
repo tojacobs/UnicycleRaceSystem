@@ -10,7 +10,7 @@ class RaceSequence:
         self.countdown = 3
         self.orangeLightAt = 1
         self.racers = [Racer("P1", 17, 27, 22), Racer("P2", 23, 24, 25)]
-        self.stop = False
+        self.exit = False
 
     def setCallbackFunctions(self, displayCallback):
         self.display = displayCallback
@@ -79,6 +79,6 @@ class RaceSequence:
                 racer.setStartTime(startTime)
             self.display("Starttijd: " + datetime.datetime.fromtimestamp(time.time()).ctime())
 
-        while (not self.status == State.RaceFinished) and (not self.stop):    
+        while (not self.status == State.RaceFinished) and (not self.exit):    
             time.sleep(1)
         self.display("Race gefinished, type een commando...")

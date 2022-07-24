@@ -18,10 +18,16 @@ class UnicycleRaceSystem:
         #print(data, end=end)
         self._UserInterface.displayText(data)
 
+    def exit(self):
+        self._raceSequence.exit = True
+        self._server.exit = True
+        self._UserInterface.exit = True
 
     def run(self):
         self._raceSequence.setCallbackFunctions(self.display)
         self._server.setCallbackFunctions(self.receivedDataFromServer, self.display)
+        self._UserInterface.setExitCommandCallback(self.exit)
+
         start_new_thread(self._server.server_program,())
         self._UserInterface.start()
 

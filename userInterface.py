@@ -9,3 +9,5 @@ class UserInterface:
         pass
     def start(self):
         pass
+    def setExitCommandCallback(self, Callback):
+        pass
