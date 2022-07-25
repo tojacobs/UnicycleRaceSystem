@@ -82,15 +82,18 @@ class Server:
 
     def waitForClients(self):
         while (not self.bothClientsConnected()) and (not self.exit):
-            self.display("Wacht op connectie met beide clients")
+            if self._startClientConnected:
+                self.display("Wacht op connectie met finish client")
+            elif self._finishClientConnected:
+                self.display("Wacht op connectie met start client")
+            else:
+                self.display("Wacht op connectie met beide clients")
             time.sleep(2)
 
     def server_program(self):
-        start_new_thread(self.keepSteadyConnection, ())
+        start_new_thread(self.waitForClients, ())
+        self.keepSteadyConnection()
 
-        self.waitForClients()
 
-        while not self.exit:
-            time.sleep(0.1) # for cpu usage optimization
 
         
