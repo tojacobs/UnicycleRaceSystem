@@ -25,8 +25,8 @@ class Client:
         # Zet waarschuwingen uit.
         GPIO.setwarnings(False)
         # Zet de GPIO pin als ingang.
-        GPIO.setup(GPIOP1, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.setup(GPIOP2, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.setup(GPIOP1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.setup(GPIOP2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         # Gebruik een interrupt, wanneer actief run subroutinne 'signal_found_p<player>'
         GPIO.add_event_detect(GPIOP1, GPIO.RISING, callback=self.signalFoundP1, bouncetime=200)
         GPIO.add_event_detect(GPIOP2, GPIO.RISING, callback=self.signalFoundP2, bouncetime=200)
