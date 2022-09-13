@@ -14,9 +14,7 @@ class UnicycleRaceSystem:
         self._raceSequence.processReceivedData(data)
 
     def display(self, data, end = "\n"):
-        # Todo: after UI is split off let send this data to UI
-        #print(data, end=end)
-        self._UserInterface.displayText(data)
+        self._UserInterface.displayText(data, end)
 
     def exit(self):
         self._raceSequence.exit = True

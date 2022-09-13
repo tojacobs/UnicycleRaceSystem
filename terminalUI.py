@@ -14,8 +14,8 @@ class TerminalUI(UserInterface):
         self._answer = ""
         self.exit = False
 
-    def displayText(self,text:str):
-        print(text,end="\n")
+    def displayText(self, text, end):
+        print(text,end=end)
 
     def setExitCommandCallback(self, Callback):
         self.exitCallback = Callback
@@ -74,7 +74,7 @@ class TerminalUI(UserInterface):
         self._answer = ""
 
     def printHelp(self):
-        print("Mogelijke commando's zijn: \n-'start' Om de countdown te beginnen.\n-'namen' Om namen van Racers in te geven.\n-'countdown' Om aantal sec countdown in te stellen.\n-'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat, default is 1.\n-'stop' Om de race af te breken, alleen te gebruiken tijdens de race.\n-'help' Om dit bericht te printen")
+        print("Mogelijke commando's zijn: \n-'start' Om de countdown te beginnen.\n-'namen' Om namen van Racers in te geven.\n-'countdown' Om aantal sec countdown in te stellen.\n-'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat.\n-'stop' Om de race af te breken, alleen te gebruiken tijdens de race.\n-'help' Om dit bericht te printen")
 
     def start(self):
         start_new_thread(self.waitForAnswer, ())
