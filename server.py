@@ -16,9 +16,13 @@ class Server:
     def exit(self):
         self._exit = True
 
-    def setCallbackFunctions(self, receivedDataCallback, displayCallback):
-        self.receivedDataCallback = receivedDataCallback
-        self.display = displayCallback
+    def setCallbackFunctions(self, receivedDataCallback, startClientConnectedCallback, 
+                             finishClientConnectedCallback, startClientLostCallback, finishClientLostCallback):
+        self.receivedDataCallback          = receivedDataCallback
+        self.startClientConnectedCallback  = startClientConnectedCallback
+        self.finishClientConnectedCallback = finishClientConnectedCallback
+        self.startClientLostCallback       = startClientLostCallback
+        self.finishClientLostCallback      = finishClientLostCallback
 
     def bothClientsConnected(self):
         return (self._startClientConnected and self._finishClientConnected)
@@ -27,11 +31,11 @@ class Server:
         if ("StartClient" in data) and (not self._startClientConnected):
             self._startClientConnected = True
             self._startClientId = id
-            self.display("StartClient Connected")
+            self.startClientConnectedCallback()
         elif ("FinishClient" in data) and (not self._finishClientConnected):
             self._finishClientConnected = True
             self._finishClientId = id
-            self.display("FinishClient Connected")
+            self.finishClientConnectedCallback()
 
     def multi_threaded_client(self, connection, id):
         while not self._exit:
@@ -45,10 +49,10 @@ class Server:
             except:
                 if (id == self._startClientId):
                     self._startClientConnected = False
-                    self.display("Connectie met startClient verloren")
+                    self.startClientLostCallback()
                 elif (id == self._finishClientId):
                     self._finishClientConnected = False
-                    self.display("Connectie met finishClient verloren")
+                    self.finishClientLostCallback()
                 break
         connection.close()
 
@@ -78,13 +82,7 @@ class Server:
 
     def waitForClients(self):
         while (not self.bothClientsConnected()) and (not self._exit):
-            if self._startClientConnected:
-                self.display("Wacht op connectie met finish client")
-            elif self._finishClientConnected:
-                self.display("Wacht op connectie met start client")
-            else:
-                self.display("Wacht op connectie met beide clients")
-            time.sleep(2)
+            time.sleep(0.1) # waiting for both clients, sleep is for cpu usage optimization
 
     def server_program(self):
         start_new_thread(self.waitForClients, ())
