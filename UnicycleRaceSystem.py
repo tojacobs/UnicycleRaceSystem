@@ -8,13 +8,25 @@ class UnicycleRaceSystem:
     def __init__(self):
         self._raceSequence = RaceSequence()
         self._server = Server()
-        self._UserInterface = TerminalUI(self._server, self._raceSequence)
+        self._UserInterface = TerminalUI(self._raceSequence)
 
     def receivedDataFromServer(self, data):
         self._raceSequence.processReceivedData(data)
 
     def display(self, data, end = "\n"):
         self._UserInterface.displayText(data, end)
+
+    def startClientConnected(self):
+        self._UserInterface.startClientConnected()
+
+    def finishClientConnected(self):
+        self._UserInterface.finishClientConnected()
+
+    def startClientLost(self):
+        self._UserInterface.startClientLost()
+
+    def finishClientLostCallback(self):
+        self._UserInterface.finishClientLostCallback()
 
     def exit(self):
         self._raceSequence.exit()
@@ -23,7 +35,8 @@ class UnicycleRaceSystem:
 
     def run(self):
         self._raceSequence.setCallbackFunctions(self.display)
-        self._server.setCallbackFunctions(self.receivedDataFromServer, self.display)
+        self._server.setCallbackFunctions(self.receivedDataFromServer, self.startClientConnected, self.finishClientConnected, 
+                                          self.startClientLost, self.finishClientLostCallback)
         self._UserInterface.setExitCommandCallback(self.exit)
 
         start_new_thread(self._server.server_program,())

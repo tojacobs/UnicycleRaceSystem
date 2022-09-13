@@ -2,17 +2,17 @@ from doctest import TestResults
 import time
 from Racer import Racer
 from raceSequence import RaceSequence
-from server import Server
 from userInterface import UserInterface
 from _thread import *
 
 
 class TerminalUI(UserInterface):
-    def __init__(self,server:Server,raceSequence:RaceSequence) -> None:
-        self._server = server
+    def __init__(self,raceSequence:RaceSequence) -> None:
         self._raceSequence = raceSequence
         self._answer = ""
         self._exit = False
+        self._startClientConnected = False
+        self._finishClientConnected = False
 
     def exit(self):
         self._exit = True
@@ -22,6 +22,25 @@ class TerminalUI(UserInterface):
 
     def setExitCommandCallback(self, Callback):
         self.exitCallback = Callback
+
+    def startClientConnected(self):
+        self._startClientConnected = True
+        print("StartClient Connected")
+
+    def finishClientConnected(self):
+        self._finishClientConnected = True
+        print("FinishClient Connected") 
+
+    def startClientLost(self):
+        self._startClientConnected = False
+        print("Connectie met StartClient verloren")
+
+    def finishClientLostCallback(self):
+        self._finishClientConnected = False
+        print("Connectie met FinishClient verloren")
+
+    def bothClientsConnected(self):
+        return (self._startClientConnected and self._finishClientConnected)
 
     def waitForAnswer(self):
         while not self._exit:
@@ -80,16 +99,22 @@ class TerminalUI(UserInterface):
         print("Mogelijke commando's zijn: \n-'start' Om de countdown te beginnen.\n-'namen' Om namen van Racers in te geven.\n-'countdown' Om aantal sec countdown in te stellen.\n-'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat.\n-'stop' Om de race af te breken, alleen te gebruiken tijdens de race.\n-'help' Om dit bericht te printen")
 
     def start(self):
+        self.printHelp()
         start_new_thread(self.waitForAnswer, ())
 
-        while not self._server.bothClientsConnected() and not self._exit:
-            if self._answer == "exit":
-                self.exitCallback()
-            time.sleep(0.1)
-            
-        if not self._exit:
-            self.printHelp()
         while not self._exit:
+
+            while not self.bothClientsConnected() and not self._exit:
+                if self._answer == "exit":
+                    self.exitCallback()
+                if self._startClientConnected:
+                    print("Wacht op connectie met finish client")
+                elif self._finishClientConnected:
+                    print("Wacht op connectie met start client")
+                else:
+                    print("Wacht op connectie met beide clients")
+                time.sleep(2)
+
             time.sleep(0.1) # for cpu usage optimization
             if not self._answer == "":
                 self.processCommand()
