@@ -12,7 +12,10 @@ class TerminalUI(UserInterface):
         self._server = server
         self._raceSequence = raceSequence
         self._answer = ""
-        self.exit = False
+        self._exit = False
+
+    def exit(self):
+        self._exit = True
 
     def displayText(self, text, end):
         print(text,end=end)
@@ -21,35 +24,35 @@ class TerminalUI(UserInterface):
         self.exitCallback = Callback
 
     def waitForAnswer(self):
-        while not self.exit:
+        while not self._exit:
             time.sleep(0.1)
             self._answer = input()
 
     def setNames(self):
         try:
-            self._raceSequence.racers[0].setName(input("Geef naam van P1...\n"))
-            print("{} Raced als P1".format(self._raceSequence.racers[0].getName()))
+            self._raceSequence._racers[0].setName(input("Geef naam van P1...\n"))
+            print("{} Raced als P1".format(self._raceSequence._racers[0].getName()))
         except:
             print("Ongeldige naam, instelling niet opgeslagen")
         try:
-            self._raceSequence.racers[1].setName(input("Geef naam van P2...\n"))
-            print("{} Raced als P2".format(self._raceSequence.racers[1].getName()))
+            self._raceSequence._racers[1].setName(input("Geef naam van P2...\n"))
+            print("{} Raced als P2".format(self._raceSequence._racers[1].getName()))
         except:
             print("Ongeldige naam, instelling niet opgeslagen")
 
     def setCountdown(self):
         try:
-            self._raceSequence.countdown = int(input("Geef aantal seconden...\n"))
-            print("countdown ingesteld op {} seconden".format(self._raceSequence.countdown))
+            self._raceSequence._countdown = int(input("Geef aantal seconden...\n"))
+            print("countdown ingesteld op {} seconden".format(self._raceSequence._countdown))
         except:
             print("Ongeldig getal, instelling niet opgeslagen ")
 
     def setOrangeLightAt(self):
         try:
             answer = int(input("Geef aantal seconden...\n"))
-            if answer <= self._raceSequence.countdown:
-                self._raceSequence.orangeLightAt = answer
-                print("Oranje licht ingesteld op {} seconden".format(self._raceSequence.orangeLightAt))
+            if answer <= self._raceSequence._countdown:
+                self._raceSequence._orangeLightAt = answer
+                print("Oranje licht ingesteld op {} seconden".format(self._raceSequence._orangeLightAt))
             else:
                 print("Oranje licht sec mag niet hoger zijn dan countdown, instelling niet opgeslagen")
         except:
@@ -79,14 +82,14 @@ class TerminalUI(UserInterface):
     def start(self):
         start_new_thread(self.waitForAnswer, ())
 
-        while not self._server.bothClientsConnected() and not self.exit:
+        while not self._server.bothClientsConnected() and not self._exit:
             if self._answer == "exit":
                 self.exitCallback()
             time.sleep(0.1)
             
-        if not self.exit:
+        if not self._exit:
             self.printHelp()
-        while not self.exit:
+        while not self._exit:
             time.sleep(0.1) # for cpu usage optimization
             if not self._answer == "":
                 self.processCommand()

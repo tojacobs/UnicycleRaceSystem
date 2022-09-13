@@ -7,7 +7,7 @@ from _thread import *
 class UnicycleRaceSystem:
     def __init__(self):
         self._raceSequence = RaceSequence()
-        self._server = Server(self._raceSequence)
+        self._server = Server()
         self._UserInterface = TerminalUI(self._server, self._raceSequence)
 
     def receivedDataFromServer(self, data):
@@ -17,9 +17,9 @@ class UnicycleRaceSystem:
         self._UserInterface.displayText(data, end)
 
     def exit(self):
-        self._raceSequence.exit = True
-        self._server.exit = True
-        self._UserInterface.exit = True
+        self._raceSequence.exit()
+        self._server.exit()
+        self._UserInterface.exit()
 
     def run(self):
         self._raceSequence.setCallbackFunctions(self.display)

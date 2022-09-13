@@ -6,13 +6,15 @@ import datetime
 from raceSequence import *
 
 class Server:
-    def __init__(self, raceSequence):
+    def __init__(self):
         self._startClientConnected = False
         self._finishClientConnected = False
         self._startClientId = None
         self._finishClientId = None
-        self._raceSequence = raceSequence
-        self.exit = False
+        self._exit = False
+
+    def exit(self):
+        self._exit = True
 
     def setCallbackFunctions(self, receivedDataCallback, displayCallback):
         self.receivedDataCallback = receivedDataCallback
@@ -32,7 +34,7 @@ class Server:
             self.display("FinishClient Connected")
 
     def multi_threaded_client(self, connection, id):
-        while not self.exit:
+        while not self._exit:
             try:
                 data = connection.recv(1024).decode()
                 if not (self.bothClientsConnected()):
@@ -65,23 +67,17 @@ class Server:
         port = 5000  # initiate port no above 1024
         server_socket = socket.socket()  # get instance
         server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1) #Allows the socket to forcibly bind to a port in use by another socket
-        
-        # try to execute bind function, if it fails shut down the program
-        try:
-            server_socket.bind((host, port))  # bind host address and port together
-        except:
-            self.display("Poort is nog bezet, wacht 1 a 2 minuten")
-            self.exit = True
+        server_socket.bind((host, port))  # bind host address and port together
 
         # configure how many clients the server can listen simultaneously
         server_socket.listen(2)
-        while not self.exit:
+        while not self._exit:
             time.sleep(0.1) # for cpu usage optimization
             if not self.bothClientsConnected():
                 self.repairConnection(server_socket)
 
     def waitForClients(self):
-        while (not self.bothClientsConnected()) and (not self.exit):
+        while (not self.bothClientsConnected()) and (not self._exit):
             if self._startClientConnected:
                 self.display("Wacht op connectie met finish client")
             elif self._finishClientConnected:
@@ -94,6 +90,3 @@ class Server:
         start_new_thread(self.waitForClients, ())
         self.keepSteadyConnection()
 
-
-
-        
