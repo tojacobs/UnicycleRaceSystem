@@ -13,16 +13,18 @@ class Server:
         self._finishClientId = None
         self._exit = False
 
-    def exit(self):
-        self._exit = True
-
     def setCallbackFunctions(self, receivedDataCallback, startClientConnectedCallback, 
                              finishClientConnectedCallback, startClientLostCallback, finishClientLostCallback):
+        """setCallbackFunctions sets the callback functions that are being used by server"""
         self.receivedDataCallback          = receivedDataCallback
         self.startClientConnectedCallback  = startClientConnectedCallback
         self.finishClientConnectedCallback = finishClientConnectedCallback
         self.startClientLostCallback       = startClientLostCallback
         self.finishClientLostCallback      = finishClientLostCallback
+
+    def exit(self):
+        """exit is a callback function that will be called from UnicycleRaceSystem"""
+        self._exit = True
 
     def bothClientsConnected(self):
         return (self._startClientConnected and self._finishClientConnected)
@@ -84,7 +86,7 @@ class Server:
         while (not self.bothClientsConnected()) and (not self._exit):
             time.sleep(0.1) # waiting for both clients, sleep is for cpu usage optimization
 
-    def server_program(self):
+    def run(self):
         start_new_thread(self.waitForClients, ())
         self.keepSteadyConnection()
 
