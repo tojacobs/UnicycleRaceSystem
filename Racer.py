@@ -63,12 +63,3 @@ class Racer:
             seconds=(timeMs/1000)%60
             minutes=(timeMs/(1000*60))%60
             return minutes, seconds
-
-    def printResult(self):
-        if (self._finished and not self._falseStart):
-            minutes, seconds = self.getRaceTime()
-            return "Tijd %s: %d:%.3f" % (self._name, int(minutes), seconds)
-        elif (self._falseStart):
-            return "Valse start %s" % (self._name)
-        elif (self._DNF):
-            return "Tijd %s: DNF" % (self._name)

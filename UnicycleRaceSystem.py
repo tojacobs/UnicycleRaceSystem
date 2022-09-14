@@ -12,9 +12,6 @@ class UnicycleRaceSystem:
     def receivedDataFromServer(self, data):
         self._raceSequence.processReceivedData(data)
 
-    def display(self, data, end = "\n"):
-        self._UserInterface.displayText(data, end)
-
     def startClientConnected(self):
         self._UserInterface.startClientConnected()
 
@@ -25,7 +22,7 @@ class UnicycleRaceSystem:
         self._UserInterface.startClientLost()
 
     def finishClientLostCallback(self):
-        self._UserInterface.finishClientLostCallback()
+        self._UserInterface.finishClientLost()
 
     def exit(self):
         self._raceSequence.exit()
@@ -56,8 +53,20 @@ class UnicycleRaceSystem:
     def getOrangeLightAt(self):
         return self._raceSequence.getOrangeLightAt()
 
+    def countDownStarted(self):
+        self._UserInterface.countDownStarted()
+
+    def countDownEnded(self):
+        self._UserInterface.countDownEnded()
+
+    def raceEnded(self):
+        self._UserInterface.raceEnded()
+
+    def sendResult(self, index, finished, falseStart, DNF, raceTime):
+        self._UserInterface.sendResult(index, finished, falseStart, DNF, raceTime)
+
     def run(self):
-        self._raceSequence.setCallbackFunctions(self.display)
+        self._raceSequence.setCallbackFunctions(self.countDownStarted, self.countDownEnded, self.raceEnded, self.sendResult)
         self._server.setCallbackFunctions(self.receivedDataFromServer, self.startClientConnected, self.finishClientConnected, 
                                           self.startClientLost, self.finishClientLostCallback)
         self._UserInterface.setCallbackFunctions(self.exit, self.startRace, self.stopRace, self.setName, self.getName,

@@ -5,8 +5,6 @@ class UserInterface:
         pass
     def exit(self):
         pass
-    def displayText(self, text:str, end:str):
-        pass
     def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback, setNameCallback, getNameCallback,
                              setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback):
         pass
@@ -16,5 +14,13 @@ class UserInterface:
         pass
     def startClientLost(self):
         pass
-    def finishClientLostCallback(self):
+    def finishClientLost(self):
+        pass
+    def countDownStarted(self):
+        pass
+    def countDownEnded(self):
+        pass
+    def raceEnded(self):
+        pass
+    def sendResult(self, index:int, finished:bool, falseStart:bool, DNF:bool, raceTime:tuple):
         pass
