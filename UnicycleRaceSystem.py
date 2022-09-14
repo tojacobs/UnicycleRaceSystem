@@ -33,11 +33,17 @@ class UnicycleRaceSystem:
         self._server.exit()
         self._UserInterface.exit()
 
+    def startRace(self):
+        self._raceSequence.startRace()
+
+    def stopRace(self):
+        self._raceSequence.stopRace()
+
     def run(self):
         self._raceSequence.setCallbackFunctions(self.display)
         self._server.setCallbackFunctions(self.receivedDataFromServer, self.startClientConnected, self.finishClientConnected, 
                                           self.startClientLost, self.finishClientLostCallback)
-        self._UserInterface.setExitCommandCallback(self.exit)
+        self._UserInterface.setCallbackFunctions(self.exit, self.startRace, self.stopRace)
 
         start_new_thread(self._server.server_program,())
         self._UserInterface.start()

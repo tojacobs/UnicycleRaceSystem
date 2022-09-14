@@ -5,11 +5,13 @@ from server import Server
 class UserInterface:
     def __init__(self,raceSequence:RaceSequence) -> None:
         pass
-    def displayText(self, text:str, end:str):
-        pass
     def start(self):
         pass
-    def setExitCommandCallback(self, Callback):
+    def exit(self):
+        pass
+    def displayText(self, text:str, end:str):
+        pass
+    def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback):
         pass
     def startClientConnected(self):
         pass 

@@ -20,8 +20,10 @@ class TerminalUI(UserInterface):
     def displayText(self, text, end):
         print(text,end=end)
 
-    def setExitCommandCallback(self, Callback):
-        self.exitCallback = Callback
+    def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback):
+        self.exitCallback = exitCallback
+        self.startRaceCallback = startRaceCallback
+        self.stopRaceCallback = stopRaceCallback
 
     def startClientConnected(self):
         self._startClientConnected = True
@@ -78,8 +80,8 @@ class TerminalUI(UserInterface):
             print("Ongeldig getal, instelling niet opgeslagen")
 
     def processCommand(self):
-        if self._answer == "start":
-            self._raceSequence.startRace()
+        if   self._answer == "start":
+            start_new_thread(self.startRaceCallback,())
         elif self._answer == "namen":
             self.setNames()
         elif self._answer == "countdown":
@@ -88,6 +90,8 @@ class TerminalUI(UserInterface):
             self.setOrangeLightAt()
         elif self._answer == "help":
             self.printHelp()
+        elif self._answer == "stop":
+            self.stopRaceCallback()
         elif self._answer == "exit":
             print("poging tot programma afsluiten, mocht dit niet werken dan programma sluiten met Ctrl+c")
             self.exitCallback()
@@ -99,14 +103,16 @@ class TerminalUI(UserInterface):
         print("Mogelijke commando's zijn: \n-'start' Om de countdown te beginnen.\n-'namen' Om namen van Racers in te geven.\n-'countdown' Om aantal sec countdown in te stellen.\n-'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat.\n-'stop' Om de race af te breken, alleen te gebruiken tijdens de race.\n-'help' Om dit bericht te printen")
 
     def start(self):
-        self.printHelp()
         start_new_thread(self.waitForAnswer, ())
+        helpPrinted = False
 
         while not self._exit:
 
             while not self.bothClientsConnected() and not self._exit:
                 if self._answer == "exit":
                     self.exitCallback()
+                if self._answer == "stop":
+                    self.stopRaceCallback()
                 if self._startClientConnected:
                     print("Wacht op connectie met finish client")
                 elif self._finishClientConnected:
@@ -114,6 +120,10 @@ class TerminalUI(UserInterface):
                 else:
                     print("Wacht op connectie met beide clients")
                 time.sleep(2)
+
+            if not helpPrinted:
+                self.printHelp()
+                helpPrinted = True
 
             time.sleep(0.1) # for cpu usage optimization
             if not self._answer == "":
