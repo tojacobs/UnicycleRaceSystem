@@ -14,18 +14,15 @@ class TerminalUI(UserInterface):
     def exit(self):
         self._exit = True
 
-    def displayText(self, text, end):
-        print(text,end=end)
-
     def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback, setNameCallback, getNameCallback,
                              setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback):
-        self.exitCallback = exitCallback
-        self.startRaceCallback = startRaceCallback
-        self.stopRaceCallback = stopRaceCallback
-        self.setNameCallback = setNameCallback
-        self.getNameCallback = getNameCallback
-        self.setCountdownCallback = setCountdownCallback
-        self.getCountdownCallback = getCountdownCallback
+        self.exitCallback             = exitCallback
+        self.startRaceCallback        = startRaceCallback
+        self.stopRaceCallback         = stopRaceCallback
+        self.setNameCallback          = setNameCallback
+        self.getNameCallback          = getNameCallback
+        self.setCountdownCallback     = setCountdownCallback
+        self.getCountdownCallback     = getCountdownCallback
         self.setOrangeLightAtCallback = setOrangeLightAtCallback
         self.getOrangeLightAtCallback = getOrangeLightAtCallback
 
@@ -41,16 +38,45 @@ class TerminalUI(UserInterface):
         self._startClientConnected = False
         print("Connectie met StartClient verloren")
 
-    def finishClientLostCallback(self):
+    def finishClientLost(self):
         self._finishClientConnected = False
         print("Connectie met FinishClient verloren")
+
+    def countDownStarted(self):
+        print("Nieuwe race gestart! Countdown is begonnen!")
+        start_new_thread(self.startCountdown, (self.getCountdownCallback(), ))
+
+    def countDownEnded(self):
+        print("GO!  ")
+
+    def raceEnded(self):
+        print("Race gefinished, type een commando...")
+
+    def sendResult(self, index, finished, falseStart, DNF, raceTime):
+        if DNF:
+            print("Tijd %s: DNF" % (self.getNameCallback(index)))
+        elif falseStart:
+            print("Tijd %s: Valse start" % (self.getNameCallback(index)))
+        elif finished:
+            minutes, seconds = raceTime
+            print("Tijd %s: %d:%.3f" % (self.getNameCallback(index), int(minutes), seconds))
+        else:
+            pass # do nothing
+
+    def startCountdown(self, t):
+        while t:
+            mins, secs = divmod(t, 60)
+            timer = '{:02d}:{:02d}'.format(mins, secs)
+            print(timer, end="\r")
+            time.sleep(1)
+            t -= 1
 
     def bothClientsConnected(self):
         return (self._startClientConnected and self._finishClientConnected)
 
     def waitForAnswer(self):
         while not self._exit:
-            time.sleep(0.1)
+            time.sleep(0.1) # sleep is for CPU optimization
             self._answer = input()
 
     def setNames(self):
@@ -98,14 +124,14 @@ class TerminalUI(UserInterface):
         elif self._answer == "stop":
             self.stopRaceCallback()
         elif self._answer == "exit":
-            print("poging tot programma afsluiten, mocht dit niet werken dan programma sluiten met Ctrl+c")
+            print("Programma afsluiten... mocht dit niet werken dan programma sluiten met Ctrl+c")
             self.exitCallback()
         else:
             print("type een geldig commando of type 'help'")
         self._answer = ""
 
     def printHelp(self):
-        print("Mogelijke commando's zijn: \n-'start' Om de countdown te beginnen.\n-'namen' Om namen van Racers in te geven.\n-'countdown' Om aantal sec countdown in te stellen.\n-'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat.\n-'stop' Om de race af te breken, alleen te gebruiken tijdens de race.\n-'help' Om dit bericht te printen")
+        print("Mogelijke commando's zijn: \n-'start' Om de countdown te beginnen.\n-'namen' Om namen van Racers in te geven.\n-'countdown' Om aantal sec countdown in te stellen.\n-'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat.\n-'stop' Om de race af te breken, alleen te gebruiken tijdens de race.\n-'exit' Om het programma te sluiten.\n-'help' Om dit bericht te printen")
 
     def start(self):
         start_new_thread(self.waitForAnswer, ())
