@@ -17,7 +17,7 @@ class Racer:
         self._finished = False
         self._light.turnOff(Color.Orange)
         self._light.turnOff(Color.Green)
-        self._light.turnOn(Color.Red)
+        self._light.turnOff(Color.Red)
         self._light.setBlinking(False)
         self._DNF = False
 
@@ -37,7 +37,6 @@ class Racer:
     def setFalseStart(self, falseStart):
         self._falseStart = falseStart
         self._finished = True
-        self._light.setBlinking(True)
 
     def getFalseStart(self):
         return self._falseStart
@@ -51,11 +50,21 @@ class Racer:
     def setDNF(self):
         self._DNF = True
 
+    def countDownStarted(self):
+        self._light.turnOn(Color.Red)
+
+    def swithToOrange(self):
+        if (not self._falseStart):
+            self._light.turnOn(Color.Orange)
+            self._light.turnOff(Color.Red)
+
     def startRace(self):
         if (not self._falseStart):
             self._light.turnOn(Color.Green)
             self._light.turnOff(Color.Red)
             self._light.turnOff(Color.Orange)
+        else:
+            self._light.setBlinking(True)
 
     def getRaceTime(self):
         if (self._finished and not self._falseStart):
