@@ -11,6 +11,7 @@ class RaceSequence:
         self._orangeLightAt = 2
         self._racers = [Racer("P1", 17, 27, 22), Racer("P2", 23, 24, 25)]
         self._exit = False
+        self._stop = False
 
     def exit(self):
         self._exit = True
@@ -19,7 +20,7 @@ class RaceSequence:
         self.display = displayCallback
 
     def processEndTime(self, data, racer):
-        if not (racer.getFalseStart() or racer.getFinished()):
+        if not (racer.getFalseStart() or racer.getFinished() or racer.getDNF()):
             data = data.split(':')[1]
             racer.setFinishTime(float(data)/1000)
             self.display(racer.printResult())
@@ -28,7 +29,7 @@ class RaceSequence:
     def endRaceIfNeeded(self):
         endRace = []
         for racer in self._racers:
-            if (racer.getFinished() or racer.getFalseStart()):
+            if (racer.getFinished() or racer.getFalseStart() or racer.getDNF()):
                 endRace.append(True)
             else:
                 endRace.append(False)
@@ -65,6 +66,18 @@ class RaceSequence:
                         racer._light.turnOn(Color.Orange)
                         racer._light.turnOff(Color.Red)
 
+    def stopRace(self):
+        self._stop = True
+
+    def registerDNFs(self):
+        self._stop = False
+        for racer in self._racers:
+            if not (racer.getFinished() or racer.getFalseStart() or racer.getDNF()):
+                racer.setDNF()
+            if racer.getDNF():
+                self.display(racer.printResult())
+        self.endRaceIfNeeded()
+
     def startRace(self):
         self._status = State.WaitingForCountDown
         #self.waitForClients()
@@ -82,6 +95,8 @@ class RaceSequence:
                 racer.setStartTime(startTime)
             self.display("Starttijd: " + datetime.datetime.fromtimestamp(time.time()).ctime())
 
-        while (not self._status == State.RaceFinished) and (not self._exit):    
+        while (not self._status == State.RaceFinished) and (not self._exit) and (not self._stop):   
             time.sleep(1)
+        if self._stop:
+            self.registerDNFs()
         self.display("Race gefinished, type een commando...")
