@@ -11,9 +11,6 @@ class TerminalUI(UserInterface):
         self._startClientConnected = False
         self._finishClientConnected = False
 
-    def exit(self):
-        self._exit = True
-
     def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback, setNameCallback, getNameCallback,
                              setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback):
         self.exitCallback             = exitCallback
@@ -25,6 +22,9 @@ class TerminalUI(UserInterface):
         self.getCountdownCallback     = getCountdownCallback
         self.setOrangeLightAtCallback = setOrangeLightAtCallback
         self.getOrangeLightAtCallback = getOrangeLightAtCallback
+
+    def exit(self):
+        self._exit = True
 
     def startClientConnected(self):
         self._startClientConnected = True
@@ -133,7 +133,7 @@ class TerminalUI(UserInterface):
     def printHelp(self):
         print("Mogelijke commando's zijn: \n-'start' Om de countdown te beginnen.\n-'namen' Om namen van Racers in te geven.\n-'countdown' Om aantal sec countdown in te stellen.\n-'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat.\n-'stop' Om de race af te breken, alleen te gebruiken tijdens de race.\n-'exit' Om het programma te sluiten.\n-'help' Om dit bericht te printen")
 
-    def start(self):
+    def run(self):
         start_new_thread(self.waitForAnswer, ())
         helpPrinted = False
 

@@ -13,32 +13,44 @@ class RaceSequence:
         self._exit = False
         self._stop = False
 
-    def exit(self):
-        self._exit = True
-
     def setCallbackFunctions(self, countDownStartedCallback, countdownEndedCallback, raceEndedCallback, sendResultCallback):
+        """setCallbackFunctions sets the callback functions that are being used by raceSequence"""
         self.countDownStartedCallback = countDownStartedCallback
         self.countdownEndedCallback   = countdownEndedCallback
         self.raceEndedCallback        = raceEndedCallback
         self.sendResultCallback       = sendResultCallback
 
+    def exit(self):
+        """exit is a callback function that will be called from UnicycleRaceSystem"""
+        self._exit = True
+
     def setName(self, index, name):
+        """setName is a callback function that will be called from UnicycleRaceSystem"""
         self._racers[index].setName(name)
 
     def getName(self, index):
+        """getName is a callback function that will be called from UnicycleRaceSystem"""
         return self._racers[index].getName()
 
     def setCountdown(self, seconds):
+        """setCountdown is a callback function that will be called from UnicycleRaceSystem"""
         self._countdown = seconds
 
     def getCountdown(self):
+        """getCountdown is a callback function that will be called from UnicycleRaceSystem"""
         return self._countdown
 
     def setOrangeLightAt(self, seconds):
+        """setOrangeLightAt is a callback function that will be called from UnicycleRaceSystem"""
         self._orangeLightAt = seconds
 
     def getOrangeLightAt(self):
+        """getOrangeLightAt is a callback function that will be called from UnicycleRaceSystem"""
         return self._orangeLightAt
+
+    def stopRace(self):
+        """stopRace is a callback function that will be called from UnicycleRaceSystem"""
+        self._stop = True
 
     def processEndTime(self, data, racer, index):
         if not (racer.getFalseStart() or racer.getFinished() or racer.getDNF()):
@@ -63,6 +75,7 @@ class RaceSequence:
         self.endRaceIfNeeded()
 
     def processReceivedData(self, data):
+        """processReceivedData is a callback function that will be called from UnicycleRaceSystem"""
         if self._status == State.CountingDown:
             if (data.startswith("p1StartClient")):
                 self.processFalseStart(data, self._racers[0], 0)
@@ -84,9 +97,6 @@ class RaceSequence:
                         racer._light.turnOn(Color.Orange)
                         racer._light.turnOff(Color.Red)
 
-    def stopRace(self):
-        self._stop = True
-
     def registerDNFs(self):
         self._stop = False
         for tuple in enumerate(self._racers):
@@ -98,6 +108,7 @@ class RaceSequence:
         self.endRaceIfNeeded()
 
     def startRace(self):
+        """startRace is a callback function that will be called from UnicycleRaceSystem"""
         self._status = State.WaitingForCountDown
         for racer in self._racers:
             racer.reset()

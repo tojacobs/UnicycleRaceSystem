@@ -5,29 +5,19 @@ from _thread import *
 
 class UnicycleRaceSystem:
     def __init__(self):
+        self._UIs = []
         self._raceSequence = RaceSequence()
         self._server = Server()
-        self._UserInterface = TerminalUI()
-
-    def receivedDataFromServer(self, data):
-        self._raceSequence.processReceivedData(data)
-
-    def startClientConnected(self):
-        self._UserInterface.startClientConnected()
-
-    def finishClientConnected(self):
-        self._UserInterface.finishClientConnected()
-
-    def startClientLost(self):
-        self._UserInterface.startClientLost()
-
-    def finishClientLostCallback(self):
-        self._UserInterface.finishClientLost()
+        self._UIs.append(TerminalUI())
 
     def exit(self):
         self._raceSequence.exit()
         self._server.exit()
-        self._UserInterface.exit()
+        for ui in self._UIs:
+            ui.exit()
+
+    def receivedDataFromServer(self, data):
+        self._raceSequence.processReceivedData(data)
 
     def startRace(self):
         self._raceSequence.startRace()
@@ -53,27 +43,49 @@ class UnicycleRaceSystem:
     def getOrangeLightAt(self):
         return self._raceSequence.getOrangeLightAt()
 
+    def startClientConnected(self):
+        for ui in self._UIs:
+            ui.startClientConnected()
+
+    def finishClientConnected(self):
+        for ui in self._UIs:
+            ui.finishClientConnected()
+
+    def startClientLost(self):
+        for ui in self._UIs:
+            ui.startClientLost()
+
+    def finishClientLost(self):
+        for ui in self._UIs:
+            ui.finishClientLost()
+
     def countDownStarted(self):
-        self._UserInterface.countDownStarted()
+        for ui in self._UIs:
+            ui.countDownStarted()
 
     def countDownEnded(self):
-        self._UserInterface.countDownEnded()
+        for ui in self._UIs:
+            ui.countDownEnded()
 
     def raceEnded(self):
-        self._UserInterface.raceEnded()
+        for ui in self._UIs:
+            ui.raceEnded()
 
     def sendResult(self, index, finished, falseStart, DNF, raceTime):
-        self._UserInterface.sendResult(index, finished, falseStart, DNF, raceTime)
+        for ui in self._UIs:
+            ui.sendResult(index, finished, falseStart, DNF, raceTime)
 
     def run(self):
         self._raceSequence.setCallbackFunctions(self.countDownStarted, self.countDownEnded, self.raceEnded, self.sendResult)
         self._server.setCallbackFunctions(self.receivedDataFromServer, self.startClientConnected, self.finishClientConnected, 
-                                          self.startClientLost, self.finishClientLostCallback)
-        self._UserInterface.setCallbackFunctions(self.exit, self.startRace, self.stopRace, self.setName, self.getName,
+                                          self.startClientLost, self.finishClientLost)
+        for ui in self._UIs:
+            ui.setCallbackFunctions(self.exit, self.startRace, self.stopRace, self.setName, self.getName,
                                                  self.setCountdown, self.getCountdown, self.setOrangeLightAt, self.getOrangeLightAt)
 
-        start_new_thread(self._server.server_program,())
-        self._UserInterface.start()
+        for ui in self._UIs:
+            start_new_thread(ui.run, ())
+        self._server.run()
 
 if __name__ == '__main__':
     raceSystem = UnicycleRaceSystem()
