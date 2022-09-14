@@ -94,8 +94,7 @@ class RaceSequence:
             if (t == self._orangeLightAt):
                 for racer in self._racers:
                     if not (racer.getFalseStart()):
-                        racer._light.turnOn(Color.Orange)
-                        racer._light.turnOff(Color.Red)
+                        racer.swithToOrange()
 
     def registerDNFs(self):
         self._stop = False
@@ -111,7 +110,7 @@ class RaceSequence:
         """startRace is a callback function that will be called from UnicycleRaceSystem"""
         self._status = State.WaitingForCountDown
         for racer in self._racers:
-            racer.reset()
+            racer.countDownStarted()
         self.countDownStartedCallback()
         self._status = State.CountingDown
         self.startCountdown(self._countdown)
@@ -128,3 +127,5 @@ class RaceSequence:
         if self._stop:
             self.registerDNFs()
         self.raceEndedCallback()
+        for racer in self._racers:
+            racer.reset()
