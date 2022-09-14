@@ -1,14 +1,11 @@
 from doctest import TestResults
 import time
-from Racer import Racer
-from raceSequence import RaceSequence
 from userInterface import UserInterface
 from _thread import *
 
 
 class TerminalUI(UserInterface):
-    def __init__(self,raceSequence:RaceSequence) -> None:
-        self._raceSequence = raceSequence
+    def __init__(self) -> None:
         self._answer = ""
         self._exit = False
         self._startClientConnected = False
@@ -20,10 +17,17 @@ class TerminalUI(UserInterface):
     def displayText(self, text, end):
         print(text,end=end)
 
-    def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback):
+    def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback, setNameCallback, getNameCallback,
+                             setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback):
         self.exitCallback = exitCallback
         self.startRaceCallback = startRaceCallback
         self.stopRaceCallback = stopRaceCallback
+        self.setNameCallback = setNameCallback
+        self.getNameCallback = getNameCallback
+        self.setCountdownCallback = setCountdownCallback
+        self.getCountdownCallback = getCountdownCallback
+        self.setOrangeLightAtCallback = setOrangeLightAtCallback
+        self.getOrangeLightAtCallback = getOrangeLightAtCallback
 
     def startClientConnected(self):
         self._startClientConnected = True
@@ -51,29 +55,30 @@ class TerminalUI(UserInterface):
 
     def setNames(self):
         try:
-            self._raceSequence._racers[0].setName(input("Geef naam van P1...\n"))
-            print("{} Raced als P1".format(self._raceSequence._racers[0].getName()))
+            self.setNameCallback(0, input("Geef naam van P1...\n"))
+            print("{} Raced als P1".format(self.getNameCallback(0)))
         except:
             print("Ongeldige naam, instelling niet opgeslagen")
         try:
-            self._raceSequence._racers[1].setName(input("Geef naam van P2...\n"))
-            print("{} Raced als P2".format(self._raceSequence._racers[1].getName()))
+            self.setNameCallback(1, input("Geef naam van P2...\n"))
+            print("{} Raced als P2".format(self.getNameCallback(1)))
         except:
             print("Ongeldige naam, instelling niet opgeslagen")
 
     def setCountdown(self):
         try:
-            self._raceSequence._countdown = int(input("Geef aantal seconden...\n"))
-            print("countdown ingesteld op {} seconden".format(self._raceSequence._countdown))
+            #TODO countdown mag niet lager zijn dan orangeLightAt
+            self.setCountdownCallback(int(input("Geef aantal seconden...\n")))
+            print("countdown ingesteld op {} seconden".format(self.getCountdownCallback()))
         except:
             print("Ongeldig getal, instelling niet opgeslagen ")
 
     def setOrangeLightAt(self):
         try:
             answer = int(input("Geef aantal seconden...\n"))
-            if answer <= self._raceSequence._countdown:
-                self._raceSequence._orangeLightAt = answer
-                print("Oranje licht ingesteld op {} seconden".format(self._raceSequence._orangeLightAt))
+            if answer <= self.getCountdownCallback():
+                self.setOrangeLightAtCallback(answer)
+                print("Oranje licht ingesteld op {} seconden".format(self.getOrangeLightAtCallback()))
             else:
                 print("Oranje licht sec mag niet hoger zijn dan countdown, instelling niet opgeslagen")
         except:

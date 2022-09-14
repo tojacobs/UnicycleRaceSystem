@@ -19,6 +19,24 @@ class RaceSequence:
     def setCallbackFunctions(self, displayCallback):
         self.display = displayCallback
 
+    def setName(self, index, name):
+        self._racers[index].setName(name)
+
+    def getName(self, index):
+        return self._racers[index].getName()
+
+    def setCountdown(self, seconds):
+        self._countdown = seconds
+
+    def getCountdown(self):
+        return self._countdown
+
+    def setOrangeLightAt(self, seconds):
+        self._orangeLightAt = seconds
+
+    def getOrangeLightAt(self):
+        return self._orangeLightAt
+
     def processEndTime(self, data, racer):
         if not (racer.getFalseStart() or racer.getFinished() or racer.getDNF()):
             data = data.split(':')[1]

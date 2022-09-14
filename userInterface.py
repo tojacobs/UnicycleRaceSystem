@@ -1,9 +1,5 @@
-from raceSequence import RaceSequence
-from server import Server
-
-
 class UserInterface:
-    def __init__(self,raceSequence:RaceSequence) -> None:
+    def __init__(self) -> None:
         pass
     def start(self):
         pass
@@ -11,7 +7,8 @@ class UserInterface:
         pass
     def displayText(self, text:str, end:str):
         pass
-    def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback):
+    def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback, setNameCallback, getNameCallback,
+                             setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback):
         pass
     def startClientConnected(self):
         pass 
