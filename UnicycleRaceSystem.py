@@ -1,14 +1,13 @@
 from server import Server
 from raceSequence import RaceSequence
 from terminalUI import TerminalUI
-from userInterface import UserInterface
 from _thread import *
 
 class UnicycleRaceSystem:
     def __init__(self):
         self._raceSequence = RaceSequence()
         self._server = Server()
-        self._UserInterface = TerminalUI(self._raceSequence)
+        self._UserInterface = TerminalUI()
 
     def receivedDataFromServer(self, data):
         self._raceSequence.processReceivedData(data)
@@ -39,11 +38,30 @@ class UnicycleRaceSystem:
     def stopRace(self):
         self._raceSequence.stopRace()
 
+    def setName(self, index, name):
+        self._raceSequence.setName(index, name)
+
+    def getName(self, index):
+        return self._raceSequence.getName(index)
+
+    def setCountdown(self, seconds):
+        self._raceSequence.setCountdown(seconds)
+
+    def getCountdown(self):
+        return self._raceSequence.getCountdown()
+
+    def setOrangeLightAt(self, seconds):
+        self._raceSequence.setOrangeLightAt(seconds)
+
+    def getOrangeLightAt(self):
+        return self._raceSequence.getOrangeLightAt()
+
     def run(self):
         self._raceSequence.setCallbackFunctions(self.display)
         self._server.setCallbackFunctions(self.receivedDataFromServer, self.startClientConnected, self.finishClientConnected, 
                                           self.startClientLost, self.finishClientLostCallback)
-        self._UserInterface.setCallbackFunctions(self.exit, self.startRace, self.stopRace)
+        self._UserInterface.setCallbackFunctions(self.exit, self.startRace, self.stopRace, self.setName, self.getName,
+                                                 self.setCountdown, self.getCountdown, self.setOrangeLightAt, self.getOrangeLightAt)
 
         start_new_thread(self._server.server_program,())
         self._UserInterface.start()
