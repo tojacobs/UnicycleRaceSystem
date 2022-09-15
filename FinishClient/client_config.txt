@@ -1,5 +1,0 @@
-[Client]
-client_type = finish
-gpio_in_p1 = 2
-gpio_in_p2 = 3
-server_ip = 192.168.1.173
