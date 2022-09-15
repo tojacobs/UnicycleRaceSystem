@@ -113,5 +113,6 @@ def readClientConfig():
 
 if __name__ == '__main__':
     clientName, GPIOP1, GPIOP2, serverIp = readClientConfig()
+    print("Starting %s" % (clientName))
     client = Client(clientName, GPIOP1, GPIOP2, serverIp)
     client.runClientProgram()
