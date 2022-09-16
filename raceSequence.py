@@ -13,12 +13,16 @@ class RaceSequence:
         self._exit = False
         self._stop = False
 
-    def setCallbackFunctions(self, countDownStartedCallback, countdownEndedCallback, raceEndedCallback, sendResultCallback):
+    def setCallbackFunctions(self, countDownStartedCallback, countdownEndedCallback, raceEndedCallback, sendResultCallback,
+                             startSignalDetectedCallback, finishSignalDetectedCallback, falseStartDetectedCallback):
         """setCallbackFunctions sets the callback functions that are being used by raceSequence"""
-        self.countDownStartedCallback = countDownStartedCallback
-        self.countdownEndedCallback   = countdownEndedCallback
-        self.raceEndedCallback        = raceEndedCallback
-        self.sendResultCallback       = sendResultCallback
+        self.countDownStartedCallback     = countDownStartedCallback
+        self.countdownEndedCallback       = countdownEndedCallback
+        self.raceEndedCallback            = raceEndedCallback
+        self.sendResultCallback           = sendResultCallback
+        self.startSignalDetectedCallback  = startSignalDetectedCallback
+        self.finishSignalDetectedCallback = finishSignalDetectedCallback
+        self.falseStartDetectedCallback   = falseStartDetectedCallback
 
     def exit(self):
         """exit is a callback function that will be called from UnicycleRaceSystem"""
@@ -53,16 +57,16 @@ class RaceSequence:
         self._stop = True
 
     def processEndTime(self, data, racer, index):
-        if not (racer.getFalseStart() or racer.getFinished() or racer.getDNF()):
+        if not (racer.getFinished() or racer.getDNF()):
             data = data.split(':')[1]
             racer.setFinishTime(float(data)/1000)
-            self.sendResultCallback(index, racer.getFinished(), racer.getFalseStart(), racer.getDNF(), racer.getRaceTime())
+            self.sendResultCallback(index, racer.getFalseStart(), racer.getDNF(), racer.getRaceTime(), racer.getReactionTimeInMS())
         self.endRaceIfNeeded()
 
     def endRaceIfNeeded(self):
         endRace = []
         for racer in self._racers:
-            if (racer.getFinished() or racer.getFalseStart() or racer.getDNF()):
+            if (racer.getFinished() or racer.getDNF()):
                 endRace.append(True)
             else:
                 endRace.append(False)
@@ -71,21 +75,33 @@ class RaceSequence:
 
     def processFalseStart(self, data, racer, index):
         racer.setFalseStart(True)
-        self.sendResultCallback(index, racer.getFinished(), racer.getFalseStart(), racer.getDNF(), racer.getRaceTime())
-        self.endRaceIfNeeded()
+        data = data.split(':')[1]
+        racer.setReactionTime(float(data)/1000)
+        self.falseStartDetectedCallback(index)
+
+    def processStartClientData(self, data, index):
+        self.startSignalDetectedCallback(index)
+        if self._status == State.CountingDown:
+            self.processFalseStart(data, self._racers[index], index)
+        elif self._status == State.RaceStarted:
+            data = data.split(':')[1]
+            self._racers[index].setReactionTime(float(data)/1000)
+
+    def processFinishClientData(self, data, index):
+        self.finishSignalDetectedCallback(index)
+        if self._status == State.RaceStarted:
+            self.processEndTime(data, self._racers[index], index)
 
     def processReceivedData(self, data):
         """processReceivedData is a callback function that will be called from UnicycleRaceSystem"""
-        if self._status == State.CountingDown:
-            if (data.startswith("p1StartClient")):
-                self.processFalseStart(data, self._racers[0], 0)
-            elif (data.startswith("p2StartClient")):
-                self.processFalseStart(data, self._racers[1], 1)
-        elif self._status == State.RaceStarted:
-            if (data.startswith("p1FinishClient")):
-                self.processEndTime(data, self._racers[0], 0)
-            elif (data.startswith("p2FinishClient")):
-                self.processEndTime(data, self._racers[1], 1)
+        if   (data.startswith("p1StartClient")):
+            self.processStartClientData(data, 0)
+        elif (data.startswith("p2StartClient")):
+            self.processStartClientData(data, 1)
+        elif (data.startswith("p1FinishClient")):
+            self.processFinishClientData(data, 0)
+        elif (data.startswith("p2FinishClient")):
+            self.processFinishClientData(data, 1)
 
     def startCountdown(self, t):
         while t:
@@ -100,10 +116,10 @@ class RaceSequence:
         self._stop = False
         for tuple in enumerate(self._racers):
             index, racer = tuple
-            if not (racer.getFinished() or racer.getFalseStart() or racer.getDNF()):
+            if not (racer.getFinished() or racer.getDNF()):
                 racer.setDNF()
             if racer.getDNF():
-                self.sendResultCallback(index, racer.getFinished(), racer.getFalseStart(), racer.getDNF(), racer.getRaceTime())
+                self.sendResultCallback(index, racer.getFalseStart(), racer.getDNF(), racer.getRaceTime(), racer.getReactionTimeInMS())
         self.endRaceIfNeeded()
 
     def startRace(self):
