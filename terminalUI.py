@@ -10,6 +10,7 @@ class TerminalUI(UserInterface):
         self._exit = False
         self._startClientConnected = False
         self._finishClientConnected = False
+        self._raceFinished = False
 
     def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback, setNameCallback, getNameCallback,
                              setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback):
@@ -48,20 +49,36 @@ class TerminalUI(UserInterface):
 
     def countDownEnded(self):
         print("GO!  ")
+        start_new_thread(self.startHintTimer, (15, ))
 
     def raceEnded(self):
         print("Race gefinished, type een commando...")
+        self._raceFinished = True
 
-    def sendResult(self, index, finished, falseStart, DNF, raceTime):
-        if DNF:
-            print("Tijd %s: DNF" % (self.getNameCallback(index)))
-        elif falseStart:
-            print("Tijd %s: Valse start" % (self.getNameCallback(index)))
-        elif finished:
-            minutes, seconds = raceTime
-            print("Tijd %s: %d:%.3f" % (self.getNameCallback(index), int(minutes), seconds))
+    def sendResult(self, index, falseStart, DNF, raceTime, reactionTimeMs):
+        if falseStart:
+            if DNF:
+                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: DNF,  Valse start" % (self.getNameCallback(index), reactionTimeMs))
+            else:
+                minutes, seconds = raceTime
+                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: %d:%.3f,  Valse start" % (self.getNameCallback(index), reactionTimeMs, int(minutes), seconds))
         else:
-            pass # do nothing
+            if DNF:
+                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: DNF" % (self.getNameCallback(index), reactionTimeMs))
+            else:
+                minutes, seconds = raceTime
+                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: %d:%.3f" % (self.getNameCallback(index), reactionTimeMs, int(minutes), seconds))
+
+    def startSignalDetected(self, index):
+        #print("Start sensor P%s gedetecteerd" % (index+1))
+        pass
+
+    def finishSignalDetected(self, index):
+        #print("Finish sensor P%s gedetecteerd" % (index+1))
+        pass
+
+    def falseStartDetected(self, index):
+        print("%s: Valse start gedetecteerd!" % (self.getNameCallback(index)))
 
     def startCountdown(self, t):
         while t:
@@ -70,6 +87,13 @@ class TerminalUI(UserInterface):
             print(timer, end="\r")
             time.sleep(1)
             t -= 1
+
+    def startHintTimer(self, t):
+        while (t and not self._raceFinished):
+            time.sleep(1)
+            t -= 1
+        if not self._raceFinished:
+            print("Hint: type 'stop' om een DNF aan niet gefinishte rijders te geven en de race te stoppen")
 
     def bothClientsConnected(self):
         return (self._startClientConnected and self._finishClientConnected)
@@ -112,6 +136,7 @@ class TerminalUI(UserInterface):
 
     def processCommand(self):
         if   self._answer == "start":
+            self._raceFinished = False
             start_new_thread(self.startRaceCallback,())
         elif self._answer == "namen":
             self.setNames()

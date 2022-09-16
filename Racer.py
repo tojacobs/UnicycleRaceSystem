@@ -8,6 +8,7 @@ class Racer:
         self._falseStart = False
         self._finished = False
         self._DNF = False
+        self._startLineTimeInMs = None
         self._light = TrafficLight(GPIORed, GPIOOrange, GPIOGreen)
 
     def reset(self):
@@ -20,6 +21,7 @@ class Racer:
         self._light.turnOff(Color.Red)
         self._light.setBlinking(False)
         self._DNF = False
+        self._startLineTimeInMs = None
 
     def setName(self, Name):
         self._name = Name
@@ -36,7 +38,6 @@ class Racer:
 
     def setFalseStart(self, falseStart):
         self._falseStart = falseStart
-        self._finished = True
 
     def getFalseStart(self):
         return self._falseStart
@@ -49,6 +50,16 @@ class Racer:
 
     def setDNF(self):
         self._DNF = True
+
+    def setReactionTime(self, reactionTime):
+        self._startLineTimeInMs = reactionTime
+
+    def getReactionTimeInMS(self):
+        if self._startLineTimeInMs != None:
+            timeMs = self._startLineTimeInMs*1000 - self._startTimeInMs*1000
+            return int(timeMs)
+        else:
+            return None
 
     def countDownStarted(self):
         self._light.turnOn(Color.Red)
@@ -67,8 +78,10 @@ class Racer:
             self._light.setBlinking(True)
 
     def getRaceTime(self):
-        if (self._finished and not self._falseStart):
+        if (not self._DNF):
             timeMs = self._finishTimeInMs*1000 - self._startTimeInMs*1000
             seconds=(timeMs/1000)%60
             minutes=(timeMs/(1000*60))%60
             return minutes, seconds
+        else:
+            return 0, 0

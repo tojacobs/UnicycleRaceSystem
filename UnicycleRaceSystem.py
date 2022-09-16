@@ -71,12 +71,25 @@ class UnicycleRaceSystem:
         for ui in self._UIs:
             ui.raceEnded()
 
-    def sendResult(self, index, finished, falseStart, DNF, raceTime):
+    def sendResult(self, index, falseStart, DNF, raceTime, reactionTimeMs):
         for ui in self._UIs:
-            ui.sendResult(index, finished, falseStart, DNF, raceTime)
+            ui.sendResult(index, falseStart, DNF, raceTime, reactionTimeMs)
+
+    def startSignalDetected(self, index):
+        for ui in self._UIs:
+            ui.startSignalDetected(index)
+
+    def finishSignalDetected(self, index):
+        for ui in self._UIs:
+            ui.finishSignalDetected(index)
+
+    def falseStartDetected(self, index):
+        for ui in self._UIs:
+            ui.falseStartDetected(index)
 
     def run(self):
-        self._raceSequence.setCallbackFunctions(self.countDownStarted, self.countDownEnded, self.raceEnded, self.sendResult)
+        self._raceSequence.setCallbackFunctions(self.countDownStarted, self.countDownEnded, self.raceEnded, self.sendResult,
+                                                self.startSignalDetected, self.finishSignalDetected, self.falseStartDetected)
         self._server.setCallbackFunctions(self.receivedDataFromServer, self.startClientConnected, self.finishClientConnected, 
                                           self.startClientLost, self.finishClientLost)
         for ui in self._UIs:
