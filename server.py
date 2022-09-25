@@ -82,11 +82,6 @@ class Server:
             if not self.bothClientsConnected():
                 self.repairConnection(server_socket)
 
-    def waitForClients(self):
-        while (not self.bothClientsConnected()) and (not self._exit):
-            time.sleep(0.1) # waiting for both clients, sleep is for cpu usage optimization
-
     def run(self):
-        start_new_thread(self.waitForClients, ())
         self.keepSteadyConnection()
 
