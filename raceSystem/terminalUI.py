@@ -1,6 +1,5 @@
-from doctest import TestResults
 import time
-from userInterface import UserInterface
+from raceSystem.userInterface import UserInterface
 from _thread import *
 
 

@@ -3,7 +3,7 @@ import os
 from _thread import *
 import time
 import datetime
-from raceSequence import *
+from raceSystem.raceSequence import *
 
 class Server:
     def __init__(self):

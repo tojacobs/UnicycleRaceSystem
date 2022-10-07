@@ -1,4 +1,4 @@
-from trafficLight import *
+from raceSystem.trafficLight import *
 
 class Racer:
     def __init__(self, Name, GPIORed, GPIOOrange, GPIOGreen):
