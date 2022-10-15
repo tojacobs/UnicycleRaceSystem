@@ -1,6 +1,6 @@
-from server import Server
-from raceSequence import RaceSequence
-from terminalUI import TerminalUI
+from raceSystem.server import Server
+from raceSystem.raceSequence import RaceSequence
+from raceSystem.terminalUI import TerminalUI
 from _thread import *
 
 class UnicycleRaceSystem:

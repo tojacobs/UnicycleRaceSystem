@@ -1,0 +1,35 @@
+# sequencediagram.org
+title Unicycle Race System happy flow connection
+
+participant "UserInterface" as ui
+participant "UnicycleRaceSystem" as system
+participant "Server" as sv
+participant "RaceSequence" as rs
+participant "Racer" as rc
+participant "Trafficlight" as tl
+participant "StartLineClient" as sc
+participant "FinishLineClient" as fc
+
+note over system: Assume that the system was started,\nso UserInterface and Server are running
+activate sv
+activate ui
+activate sc
+note over sc: StartClient is being started
+sc->sv: socket.accept(data)
+sv->sv: starts thread for start\nclient to receive data
+sv->system: startClientConnected()
+activate system
+system->ui: startClientConnected()
+ui-->system: void
+system-->sv: void
+deactivate system
+activate fc
+note over fc: FinishClient is being started
+fc->sv: socket.accept(data)
+sv->sv: starts thread for finish\nclient to receive data
+sv->system: finishClientConnected()
+activate system
+system->ui: finishClientConnected()
+ui-->system: void
+system-->sv: void
+deactivate system

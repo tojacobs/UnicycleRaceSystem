@@ -1,0 +1,31 @@
+# sequencediagram.org
+title Unicycle Race System start and exit sequence
+
+participant "UserInterface" as ui
+participant "UnicycleRaceSystem" as system
+participant "Server" as sv
+participant "RaceSequence" as rs
+
+activate system
+system->ui: start_new_thread(run())
+activate ui
+ui-->system: void
+system->sv: start_new_thread(run())
+activate sv
+sv-->system: void
+deactivate system
+
+ui->system: exit()
+activate system
+system->rs: exit()
+activate rs
+note right of rs: This call is done for the situation\nthat a race is ongoing while exit is called,\nto end the thread that would be running on RaceSequence.
+rs-->system: void()
+deactivate rs
+system->sv: exit()
+sv-->system: void()
+deactivate sv
+system->ui: exit()
+ui-->system: void()
+deactivate ui
+deactivate system

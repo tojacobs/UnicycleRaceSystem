@@ -1,8 +1,8 @@
 import time
 import datetime
-from state import State
-from trafficLight import *
-from Racer import Racer
+from raceSystem.state import State
+from raceSystem.trafficLight import *
+from raceSystem.Racer import Racer
   
 class RaceSequence:
     def __init__(self):

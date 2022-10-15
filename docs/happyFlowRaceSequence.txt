@@ -1,0 +1,129 @@
+# sequencediagram.org
+title Unicycle Race System happy flow race
+
+participant "UserInterface" as ui
+participant "UnicycleRaceSystem" as system
+participant "Server" as sv
+participant "RaceSequence" as rs
+participant "Racer" as rc
+participant "Trafficlight" as tl
+participant "StartLineClient" as sc
+participant "FinishLineClient" as fc
+
+note over system: Assume that the system was started,\nso UserInterface and Server are running,\nAnd start and finish client are connected.
+activate sv
+activate ui
+ui->system: startRace()
+activate system
+system->rs: start_new_thread(startRace())
+activate rs
+rs-->system: void
+system-->ui: void
+deactivate system
+loop for each racer
+rs->rc: countDownStarted()
+activate rc
+rc->tl: turnOn(Red)
+activate tl
+tl-->rc: void
+deactivate tl
+rc-->rs: void
+end
+deactivate rc
+rs->system: countDownStarted()
+activate system
+system->ui: countDownStarted()
+ui-->system: void
+system-->rs: void
+deactivate system
+rs->rs: startCountdown
+activate rs
+loop for each racer
+rs->rc: switchToOrange()
+activate rc
+rc->tl: turnOn(orange)
+activate tl
+tl->rc: void
+deactivate tl
+rc->tl: turnOff(Red)
+activate tl
+tl->rc: void
+deactivate tl
+rc-->rs: void
+end
+deactivate rc
+deactivate rs
+rs->system: countDownEnded()
+activate system
+system->ui: countDownEnded()
+ui-->system: void
+system-->rs: void
+deactivate system
+loop for each racer
+rs->rc: startRace(startTime)
+activate rc
+rc->tl: turnOn(Green)
+activate tl
+tl-->rc: void
+deactivate tl
+rc->tl: turnOff(Red)
+activate tl
+tl-->rc: void
+deactivate tl
+rc->tl: turnOff(Orange)
+activate tl
+tl-->rc: void
+deactivate tl
+rc-->rs: void
+end
+deactivate rc
+
+group info [In happy flow this happens for each driver]
+sc->sv: connection.recv(data)
+sv->system: receivedData(data)
+activate system
+system->rs: processReceivedData(data)
+rs->rs: processStartClientData\n(data)
+activate rs
+rs->rc: setReactionTime(Time)
+activate rc
+rc-->rs: void
+deactivate rc
+rs-->system: void
+deactivate rs
+system-->sv: void
+end
+deactivate system
+
+group info [In happy flow this happens for each driver]
+fc->sv: connection.recv(data)
+sv->system: receivedData(data)
+activate system
+system->rs: processReceivedData(data)
+rs->rs: processFinishClientData\n(data)
+activate rs
+rs->rs: processEndTime(Time)
+activate rs
+rs->rc: setFinishTime(Time)
+activate rc
+rc-->rs: void
+deactivate rc
+rs->system: sendResult(bool FalseStart,\n                   bool DNF,\n                   raceTime,\n                   reactionTime)
+activate system
+system->ui: sendResult(bool FalseStart,\n                   bool DNF,\n                   raceTime,\n                   reactionTime)
+ui-->system: void
+system-->rs: void
+end
+deactivate system
+rs->rs: endRaceIfNeeded()
+deactivate rs
+deactivate rs
+rs->system: raceEnded()
+activate system
+system->ui: raceEnded()
+ui-->system: void
+system-->rs: void
+deactivate system
+deactivate rs
+system-->sv: void
+deactivate system
