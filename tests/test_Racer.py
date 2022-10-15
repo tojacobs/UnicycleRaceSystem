@@ -40,3 +40,17 @@ def test_startRaceLightStatus(racer):
     # Assert
     expectedCalls = [call.turnOn(Color.Green), call.turnOff(Color.Red), call.turnOff(Color.Orange)]
     racer._light.assert_has_calls(expectedCalls, any_order=True)
+
+def test_startRaceLightStatusFalseStart(racer):
+    '''Test if after startRace is called when there was a false start turnOff and turnOn are not called 
+    because the light status should stay as is. But setBlinking is is called which will led the turned on light blink'''
+    # Arrange
+    racer.setFalseStart(True)
+
+    # Act
+    racer.startRace()
+
+    # Assert
+    racer._light.turnOff.assert_not_called()
+    racer._light.turnOn.assert_not_called()
+    racer._light.setBlinking.assert_called_once_with(True)
