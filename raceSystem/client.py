@@ -72,7 +72,14 @@ class Client:
             clientSocket.send(message.encode())  # send message
             data = clientSocket.recv(1024).decode()  # receive response
         except:
+            print('Lost connection')
             self._connected = False
+
+    def heartBeat(self, clientSocket):
+        while self._connected:
+            message = "Beat" + self._clientName
+            self.sendMessage(clientSocket, message)
+            time.sleep(0.5)
 
     def runClientProgram(self):
         while True:
@@ -80,6 +87,7 @@ class Client:
                 clientSocket = self.connectToServer()
                 identificationMessageToServer = self._clientName
                 self.sendMessage(clientSocket, identificationMessageToServer)
+                start_new_thread(self.heartBeat,(clientSocket,))
                 if testMode:
                     start_new_thread(self.getInput,())
 
