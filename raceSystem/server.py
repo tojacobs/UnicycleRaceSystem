@@ -3,7 +3,7 @@ import os
 from _thread import *
 import time
 import datetime
-from raceSystem.raceSequence import *
+from raceSystem.trafficLight import testMode
 
 class Server:
     def __init__(self):

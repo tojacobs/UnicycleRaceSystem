@@ -1,7 +1,5 @@
 import time
-import datetime
 from raceSystem.state import State
-from raceSystem.trafficLight import *
 from raceSystem.Racer import Racer
   
 class RaceSequence:
