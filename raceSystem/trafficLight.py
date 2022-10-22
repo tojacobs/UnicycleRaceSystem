@@ -2,7 +2,7 @@ import enum
 import time
 from _thread import *
 try:
-    import RPi.GPIO as GPIO
+    import RPi.GPIO as GPIO # type: ignore
     testMode = False
 except:
     testMode = True

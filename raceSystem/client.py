@@ -2,7 +2,7 @@ import socket
 import time
 import configparser
 try:
-    import RPi.GPIO as GPIO
+    import RPi.GPIO as GPIO # type: ignore
     testMode = False
 except:
     testMode = True
