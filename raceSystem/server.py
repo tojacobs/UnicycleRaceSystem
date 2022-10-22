@@ -39,6 +39,13 @@ class Server:
             self._finishClientId = id
             self.finishClientConnectedCallback()
 
+    def startConnectionLost(self):
+        self._startClientConnected = False
+        self.startClientLostCallback()
+
+    def finishConnectionLost(self):
+        self._finishClientConnected = False
+        self.finishClientLostCallback()
     def multi_threaded_client(self, connection, id):
         while not self._exit:
             try:
@@ -50,11 +57,9 @@ class Server:
                 connection.send(data.encode())  # send Thanks for data to the client
             except:
                 if (id == self._startClientId):
-                    self._startClientConnected = False
-                    self.startClientLostCallback()
+                    self.startConnectionLost()
                 elif (id == self._finishClientId):
-                    self._finishClientConnected = False
-                    self.finishClientLostCallback()
+                    self.finishConnectionLost()
                 break
         connection.close()
 
