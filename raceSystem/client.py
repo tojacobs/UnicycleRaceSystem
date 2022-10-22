@@ -1,6 +1,7 @@
 import socket
 import time
 import configparser
+from _thread import *
 try:
     import RPi.GPIO as GPIO # type: ignore
     testMode = False
@@ -13,6 +14,7 @@ class Client:
         self._connected = False
         self._p1time = None
         self._p2time = None
+        self._input = ''
         if testMode:
             self._serverIp = socket.gethostname()  # as both code is running on same pc
         else:
@@ -62,14 +64,22 @@ class Client:
         return clientSocket
 
     def getInput(self):
-        return input("Enter 1 of 2 om voor p1 of p2 een sensor signaal te simuleren...")
+        while self._connected:
+            self._input = input("Enter 1 of 2 om voor p1 of p2 een sensor signaal te simuleren...")
 
     def sendMessage(self, clientSocket, message):
         try:
             clientSocket.send(message.encode())  # send message
             data = clientSocket.recv(1024).decode()  # receive response
         except:
+            print('Lost connection')
             self._connected = False
+
+    def heartBeat(self, clientSocket):
+        while self._connected:
+            message = "Beat" + self._clientName
+            self.sendMessage(clientSocket, message)
+            time.sleep(0.5)
 
     def runClientProgram(self):
         while True:
@@ -77,12 +87,17 @@ class Client:
                 clientSocket = self.connectToServer()
                 identificationMessageToServer = self._clientName
                 self.sendMessage(clientSocket, identificationMessageToServer)
+                start_new_thread(self.heartBeat,(clientSocket,))
+                if testMode:
+                    start_new_thread(self.getInput,())
 
             while self._connected:
                 if testMode:
-                    racer = self.getInput()
-                    message = "p" + racer + self._clientName + ":" + self.getCurrentMilliTime()
-                    self.sendMessage(clientSocket, message)
+                    if self._input != '':
+                        message = "p" + self._input + self._clientName + ":" + self.getCurrentMilliTime()
+                        self.sendMessage(clientSocket, message)
+                        self._input = ''
+                    time.sleep(0.1) # for CPU optimization
                 else:
                     time.sleep(0.01) # for CPU optimization
                     if not self._p1time is None:

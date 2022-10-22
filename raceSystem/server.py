@@ -11,6 +11,8 @@ class Server:
         self._finishClientConnected = False
         self._startClientId = None
         self._finishClientId = None
+        self._startLastHeartbeat = 0
+        self._finishLastHeartbeat = 0
         self._exit = False
 
     def setCallbackFunctions(self, receivedDataCallback, startClientConnectedCallback, 
@@ -39,22 +41,54 @@ class Server:
             self._finishClientId = id
             self.finishClientConnectedCallback()
 
+    def startConnectionLost(self):
+        self._startClientConnected = False
+        self.startClientLostCallback()
+
+    def finishConnectionLost(self):
+        self._finishClientConnected = False
+        self.finishClientLostCallback()
+
+    def recievedHeartBeat(self,data):
+        if ("StartClient" in data):
+            self._startLastHeartbeat = 0
+        elif ("FinishClient" in data):
+            self._finishLastHeartbeat = 0
+
+    def watchDogHeartbeat(self):
+        timeoutHeatbeat = 2
+        while not self._exit:
+            time.sleep(1)
+            if self.bothClientsConnected():
+                self._startLastHeartbeat = self._startLastHeartbeat + 1
+                if self._startLastHeartbeat >= timeoutHeatbeat:
+                    self._startLastHeartbeat = 0
+                    self.startConnectionLost()
+                self._finishLastHeartbeat = self._finishLastHeartbeat + 1
+                if self._finishLastHeartbeat >= timeoutHeatbeat:
+                    self._finishLastHeartbeat = 0
+                    self.finishConnectionLost()
+            else:
+                self._startLastHeartbeat = 0
+                self._finishLastHeartbeat = 0
+            
     def multi_threaded_client(self, connection, id):
         while not self._exit:
             try:
                 data = connection.recv(1024).decode()
                 if not (self.bothClientsConnected()):
                     self.checkIfNewClient(str(data), id)
-                self.receivedDataCallback(data)
+                if data.startswith("Beat"):
+                    self.recievedHeartBeat(data)
+                else:
+                    self.receivedDataCallback(data)
                 data = "Thanks for data"
                 connection.send(data.encode())  # send Thanks for data to the client
             except:
                 if (id == self._startClientId):
-                    self._startClientConnected = False
-                    self.startClientLostCallback()
+                    self.startConnectionLost()
                 elif (id == self._finishClientId):
-                    self._finishClientConnected = False
-                    self.finishClientLostCallback()
+                    self.finishConnectionLost()
                 break
         connection.close()
 
@@ -77,6 +111,8 @@ class Server:
 
         # configure how many clients the server can listen simultaneously
         server_socket.listen(2)
+
+        start_new_thread(self.watchDogHeartbeat,())
         while not self._exit:
             time.sleep(0.1) # for cpu usage optimization
             if not self.bothClientsConnected():
