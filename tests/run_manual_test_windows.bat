@@ -1,6 +1,6 @@
 :: this script must be executed from the Test directory
 cd ../
-python setup.py install
+pip install -e .
 cd tests/
 copy client_config_finish.txt client_config.txt
 start call python ../raceSystem/client.py
