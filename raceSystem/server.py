@@ -64,8 +64,6 @@ class Server:
 
     def keepSteadyConnection(self):
         # get the hostname if testmode is active otherwise use real ip
-        # Todo: implement a proper way to get testMode from trafficlight, currently it works because we import everything from raceSequence
-        # which imports everything from trafficLight and testMode is a global in trafficLight
         if testMode:
             host = socket.gethostname()
         else:

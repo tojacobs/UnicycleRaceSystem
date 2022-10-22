@@ -1,4 +1,5 @@
-from raceSystem.trafficLight import *
+from raceSystem.trafficLight import TrafficLight
+from raceSystem.trafficLight import Color
 
 class Racer:
     def __init__(self, Name, GPIORed, GPIOOrange, GPIOGreen):
