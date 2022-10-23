@@ -1,7 +1,15 @@
+import enum
 import time
-from raceSystem.state import State
 from raceSystem.Racer import Racer
-  
+
+
+class State(enum.Enum):
+    WaitingForCountDown = 1
+    CountingDown = 2
+    RaceStarted = 3
+    RaceFinished = 4
+
+
 class RaceSequence:
     def __init__(self):
         self._status = State.WaitingForCountDown
@@ -57,8 +65,9 @@ class RaceSequence:
     def processEndTime(self, data, racer, index):
         if not (racer.getFinished() or racer.getDNF()):
             data = data.split(':')[1]
-            racer.setFinishTime(float(data)/1000)
-            self.sendResultCallback(index, racer.getFalseStart(), racer.getDNF(), racer.getRaceTime(), racer.getReactionTimeInMS())
+            racer.setFinishTime(float(data) / 1000)
+            self.sendResultCallback(index, racer.getFalseStart(), racer.getDNF(),
+                                    racer.getRaceTime(), racer.getReactionTimeInMS())
         self.endRaceIfNeeded()
 
     def endRaceIfNeeded(self):
@@ -74,7 +83,7 @@ class RaceSequence:
     def processFalseStart(self, data, racer, index):
         racer.setFalseStart(True)
         data = data.split(':')[1]
-        racer.setReactionTime(float(data)/1000)
+        racer.setReactionTime(float(data) / 1000)
         self.falseStartDetectedCallback(index)
 
     def processStartClientData(self, data, index):
@@ -83,7 +92,7 @@ class RaceSequence:
             self.processFalseStart(data, self._racers[index], index)
         elif self._status == State.RaceStarted:
             data = data.split(':')[1]
-            self._racers[index].setReactionTime(float(data)/1000)
+            self._racers[index].setReactionTime(float(data) / 1000)
 
     def processFinishClientData(self, data, index):
         self.finishSignalDetectedCallback(index)
@@ -92,7 +101,7 @@ class RaceSequence:
 
     def processReceivedData(self, data):
         """processReceivedData is a callback function that will be called from UnicycleRaceSystem"""
-        if   (data.startswith("p1StartClient")):
+        if (data.startswith("p1StartClient")):
             self.processStartClientData(data, 0)
         elif (data.startswith("p2StartClient")):
             self.processStartClientData(data, 1)
@@ -117,7 +126,8 @@ class RaceSequence:
             if not (racer.getFinished() or racer.getDNF()):
                 racer.setDNF()
             if racer.getDNF():
-                self.sendResultCallback(index, racer.getFalseStart(), racer.getDNF(), racer.getRaceTime(), racer.getReactionTimeInMS())
+                self.sendResultCallback(index, racer.getFalseStart(), racer.getDNF(),
+                                        racer.getRaceTime(), racer.getReactionTimeInMS())
         self.endRaceIfNeeded()
 
     def startRace(self):
@@ -136,7 +146,7 @@ class RaceSequence:
                 racer.startRace()
                 racer.setStartTime(startTime)
 
-        while (not self._status == State.RaceFinished) and (not self._exit) and (not self._stop):   
+        while (not self._status == State.RaceFinished) and (not self._exit) and (not self._stop):
             time.sleep(1)
         if self._stop:
             self.registerDNFs()

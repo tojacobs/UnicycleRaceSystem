@@ -1,26 +1,28 @@
 import enum
 import time
-from _thread import *
+from _thread import start_new_thread
 try:
     import RPi.GPIO as GPIO
     testMode = False
-except:
+except ModuleNotFoundError:
     testMode = True
+
 
 class Color(enum.IntEnum):
     Red = 1
     Orange = 2
     Green = 3
 
+
 class TrafficLight:
     def __init__(self, GPIORed, GPIOOrange, GPIOGreen):
         self._gpio = {
-            Color.Red : GPIORed,
+            Color.Red: GPIORed,
             Color.Orange: GPIOOrange,
             Color.Green: GPIOGreen
         }
-        self._colorStatus =	{
-            Color.Red : False,
+        self._colorStatus = {
+            Color.Red: False,
             Color.Orange: False,
             Color.Green: False
         }
@@ -54,7 +56,7 @@ class TrafficLight:
     def setBlinking(self, blinking):
         self._blinkingActive = blinking
         if blinking and not self._threadActive:
-            start_new_thread(self.startBlinking,())
+            start_new_thread(self.startBlinking, ())
             self._threadActive = True
 
     def setGPIO(self, color, status):
@@ -72,8 +74,8 @@ class TrafficLight:
 
     def startBlinking(self):
         # Create temporary statuses because we don't want to change the original statuses
-        tempColorStatus =	{
-            Color.Red : self._colorStatus[Color.Red],
+        tempColorStatus = {
+            Color.Red: self._colorStatus[Color.Red],
             Color.Orange: self._colorStatus[Color.Orange],
             Color.Green: self._colorStatus[Color.Green]
         }

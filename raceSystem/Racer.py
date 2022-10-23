@@ -1,6 +1,7 @@
 from raceSystem.trafficLight import TrafficLight
 from raceSystem.trafficLight import Color
 
+
 class Racer:
     def __init__(self, Name, GPIORed, GPIOOrange, GPIOGreen):
         self._name = Name
@@ -56,8 +57,8 @@ class Racer:
         self._startLineTimeInMs = reactionTime
 
     def getReactionTimeInMS(self):
-        if self._startLineTimeInMs != None:
-            timeMs = self._startLineTimeInMs*1000 - self._startTimeInMs*1000
+        if self._startLineTimeInMs is not None:
+            timeMs = self._startLineTimeInMs * 1000 - self._startTimeInMs * 1000
             return int(timeMs)
         else:
             return None
@@ -80,9 +81,9 @@ class Racer:
 
     def getRaceTime(self):
         if (not self._DNF):
-            timeMs = self._finishTimeInMs*1000 - self._startTimeInMs*1000
-            seconds=(timeMs/1000)%60
-            minutes=(timeMs/(1000*60))%60
+            timeMs = self._finishTimeInMs * 1000 - self._startTimeInMs * 1000
+            seconds = (timeMs / 1000) % 60
+            minutes = (timeMs / (1000 * 60)) % 60
             return minutes, seconds
         else:
             return 0, 0
