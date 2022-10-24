@@ -14,7 +14,6 @@ class Client:
         self._connected = False
         self._p1time = None
         self._p2time = None
-        self._input = ''
         if testMode:
             self._serverIp = socket.gethostname()  # as both code is running on same pc
         else:
@@ -65,7 +64,12 @@ class Client:
 
     def getInput(self):
         while self._connected:
-            self._input = input("Enter 1 of 2 om voor p1 of p2 een sensor signaal te simuleren...")
+            userInput = input("Enter 1 of 2 om voor p1 of p2 een sensor signaal te simuleren...")
+            if userInput == '1':
+                self.signalFoundP1(0)
+            if userInput == '2':
+                self.signalFoundP2(0)
+            userInput = '' 
 
     def sendMessage(self, clientSocket, message):
         try:
@@ -92,22 +96,15 @@ class Client:
                     start_new_thread(self.getInput,())
 
             while self._connected:
-                if testMode:
-                    if self._input != '':
-                        message = "p" + self._input + self._clientName + ":" + self.getCurrentMilliTime()
-                        self.sendMessage(clientSocket, message)
-                        self._input = ''
-                    time.sleep(0.1) # for CPU optimization
-                else:
-                    time.sleep(0.01) # for CPU optimization
-                    if not self._p1time is None:
-                        message = "p1" + self._clientName + ":" + self._p1time
-                        self.sendMessage(clientSocket, message)
-                        self._p1time = None
-                    if not self._p2time is None:
-                        message = "p2" + self._clientName + ":" + self._p2time
-                        self.sendMessage(clientSocket, message)
-                        self._p2time = None
+                time.sleep(0.01) # for CPU optimization
+                if not self._p1time is None:
+                    message = "p1" + self._clientName + ":" + self._p1time
+                    self.sendMessage(clientSocket, message)
+                    self._p1time = None
+                if not self._p2time is None:
+                    message = "p2" + self._clientName + ":" + self._p2time
+                    self.sendMessage(clientSocket, message)
+                    self._p2time = None
         
         clientSocket.close()  # close the connection
 
