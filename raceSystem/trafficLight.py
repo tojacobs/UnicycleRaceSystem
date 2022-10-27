@@ -65,7 +65,7 @@ class TrafficLight:
             print(color.name, end=" ")
             print("to {0}".format(status))
         else:
-            GPIO.output(self._gpio[color], not(status))
+            GPIO.output(self._gpio[color], not (status))
 
     def restoreLightStatusAfterBlinking(self, tempColorStatus):
         for color in self._colorStatus:
@@ -82,7 +82,7 @@ class TrafficLight:
         while self._blinkingActive:
             for color in self._colorStatus:
                 if self._colorStatus[color]:
-                    tempColorStatus[color] = not(tempColorStatus[color])
+                    tempColorStatus[color] = not (tempColorStatus[color])
                     self.setGPIO(color, tempColorStatus[color])
             time.sleep(self._blinkingSpeedInSec)
         self.restoreLightStatusAfterBlinking(tempColorStatus)
