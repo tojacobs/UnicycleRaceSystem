@@ -48,7 +48,7 @@ class Server:
         self._finishClientConnected = False
         self.finishClientLostCallback()
 
-    def recievedHeartBeat(self,data):
+    def recievedHeartBeat(self, data):
         if ("StartClient" in data):
             self._startLastHeartbeat = 0
         elif ("FinishClient" in data):
@@ -70,7 +70,7 @@ class Server:
             else:
                 self._startLastHeartbeat = 0
                 self._finishLastHeartbeat = 0
-            
+
     def multi_threaded_client(self, connection, id):
         while not self._exit:
             try:
@@ -110,7 +110,7 @@ class Server:
         # configure how many clients the server can listen simultaneously
         server_socket.listen(2)
 
-        start_new_thread(self.watchDogHeartbeat,())
+        start_new_thread(self.watchDogHeartbeat, ())
         while not self._exit:
             time.sleep(0.1)  # for cpu usage optimization
             if not self.bothClientsConnected():

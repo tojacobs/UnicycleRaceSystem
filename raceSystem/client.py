@@ -1,9 +1,9 @@
 import socket
 import time
 import configparser
-from _thread import *
+from _thread import start_new_thread
 try:
-    import RPi.GPIO as GPIO # type: ignore
+    import RPi.GPIO as GPIO  # type: ignore
     testMode = False
 except ModuleNotFoundError:
     testMode = True
@@ -69,7 +69,7 @@ class Client:
                 self.signalFoundP1(0)
             if userInput == '2':
                 self.signalFoundP2(0)
-            userInput = '' 
+            userInput = ''
 
     def sendMessage(self, clientSocket, message):
         try:
@@ -91,12 +91,12 @@ class Client:
                 clientSocket = self.connectToServer()
                 identificationMessageToServer = self._clientName
                 self.sendMessage(clientSocket, identificationMessageToServer)
-                start_new_thread(self.heartBeat,(clientSocket,))
+                start_new_thread(self.heartBeat, (clientSocket,))
                 if testMode:
-                    start_new_thread(self.getInput,())
+                    start_new_thread(self.getInput, ())
 
             while self._connected:
-                time.sleep(0.01) # for CPU optimization
+                time.sleep(0.01)  # for CPU optimization
                 if self._p1time is not None:
                     message = "p1" + self._clientName + ":" + self._p1time
                     self.sendMessage(clientSocket, message)
@@ -105,8 +105,9 @@ class Client:
                     message = "p2" + self._clientName + ":" + self._p2time
                     self.sendMessage(clientSocket, message)
                     self._p2time = None
-        
+
         clientSocket.close()  # close the connection
+
 
 def readClientConfig():
     config = configparser.ConfigParser()
