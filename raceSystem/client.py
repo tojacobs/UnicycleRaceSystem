@@ -1,8 +1,9 @@
 import socket
 import time
 import configparser
+from _thread import *
 try:
-    import RPi.GPIO as GPIO
+    import RPi.GPIO as GPIO # type: ignore
     testMode = False
 except:
     testMode = True
@@ -62,14 +63,27 @@ class Client:
         return clientSocket
 
     def getInput(self):
-        return input("Enter 1 of 2 om voor p1 of p2 een sensor signaal te simuleren...")
+        while self._connected:
+            userInput = input("Enter 1 of 2 om voor p1 of p2 een sensor signaal te simuleren...")
+            if userInput == '1':
+                self.signalFoundP1(0)
+            if userInput == '2':
+                self.signalFoundP2(0)
+            userInput = '' 
 
     def sendMessage(self, clientSocket, message):
         try:
             clientSocket.send(message.encode())  # send message
             data = clientSocket.recv(1024).decode()  # receive response
         except:
+            print('Lost connection')
             self._connected = False
+
+    def heartBeat(self, clientSocket):
+        while self._connected:
+            message = "Beat" + self._clientName
+            self.sendMessage(clientSocket, message)
+            time.sleep(0.5)
 
     def runClientProgram(self):
         while True:
@@ -77,22 +91,20 @@ class Client:
                 clientSocket = self.connectToServer()
                 identificationMessageToServer = self._clientName
                 self.sendMessage(clientSocket, identificationMessageToServer)
+                start_new_thread(self.heartBeat,(clientSocket,))
+                if testMode:
+                    start_new_thread(self.getInput,())
 
             while self._connected:
-                if testMode:
-                    racer = self.getInput()
-                    message = "p" + racer + self._clientName + ":" + self.getCurrentMilliTime()
+                time.sleep(0.01) # for CPU optimization
+                if not self._p1time is None:
+                    message = "p1" + self._clientName + ":" + self._p1time
                     self.sendMessage(clientSocket, message)
-                else:
-                    time.sleep(0.01) # for CPU optimization
-                    if not self._p1time is None:
-                        message = "p1" + self._clientName + ":" + self._p1time
-                        self.sendMessage(clientSocket, message)
-                        self._p1time = None
-                    if not self._p2time is None:
-                        message = "p2" + self._clientName + ":" + self._p2time
-                        self.sendMessage(clientSocket, message)
-                        self._p2time = None
+                    self._p1time = None
+                if not self._p2time is None:
+                    message = "p2" + self._clientName + ":" + self._p2time
+                    self.sendMessage(clientSocket, message)
+                    self._p2time = None
         
         clientSocket.close()  # close the connection
 
