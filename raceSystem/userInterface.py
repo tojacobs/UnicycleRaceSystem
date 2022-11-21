@@ -40,8 +40,10 @@ class UserInterface:
         """Callback function that will be called from UnicycleRaceSystem"""
         pass
 
-    def raceEnded(self):
-        """Callback function that will be called from UnicycleRaceSystem"""
+    def raceEnded(self, winner):
+        """Callback function that will be called from UnicycleRaceSystem
+        winner holds the name of the winner.
+        If there is no winner, the value will be 'None'"""
         pass
 
     def sendResult(self, index: int, falseStart: bool, DNF: bool, raceTime: tuple, reactionTimeMs: int):

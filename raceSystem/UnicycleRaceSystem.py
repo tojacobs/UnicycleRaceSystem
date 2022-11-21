@@ -68,9 +68,9 @@ class UnicycleRaceSystem:
         for ui in self._UIs:
             ui.countDownEnded()
 
-    def raceEnded(self):
+    def raceEnded(self, winner):
         for ui in self._UIs:
-            ui.raceEnded()
+            ui.raceEnded(winner)
 
     def sendResult(self, index, falseStart, DNF, raceTime, reactionTimeMs):
         for ui in self._UIs:

@@ -10,6 +10,7 @@ class TerminalUI(UserInterface):
         self._startClientConnected = False
         self._finishClientConnected = False
         self._raceFinished = False
+        self._raceLengthInSec = 15
 
     def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback, setNameCallback, getNameCallback,
                              setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback):
@@ -48,9 +49,10 @@ class TerminalUI(UserInterface):
 
     def countDownEnded(self):
         print("GO!  ")
-        start_new_thread(self.startHintTimer, (15, ))
+        start_new_thread(self.startHintTimer, (self._raceLengthInSec, ))
 
-    def raceEnded(self):
+    def raceEnded(self, winner):
+        print("Winnaar: %s" % winner)
         print("Race gefinished, type een commando...")
         self._raceFinished = True
 
@@ -96,7 +98,8 @@ class TerminalUI(UserInterface):
             time.sleep(1)
             t -= 1
         if not self._raceFinished:
-            print("Hint: type 'stop' om een DNF aan niet gefinishte rijders te geven en de race te stoppen")
+            print("Race wordt gestopt vanwege de maximale lengte van %s seconden" % self._raceLengthInSec)
+            self.stopRaceCallback()
 
     def bothClientsConnected(self):
         return (self._startClientConnected and self._finishClientConnected)
