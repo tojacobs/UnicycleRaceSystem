@@ -8,7 +8,8 @@ class UserInterface:
         pass
 
     def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback, setNameCallback, getNameCallback,
-                             setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback):
+                             setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback,
+                             setResetTimerSeconds, getResetTimerSeconds):
         """setCallbackFunctions sets the callback functions that are being used by the user interface"""
         pass
 
