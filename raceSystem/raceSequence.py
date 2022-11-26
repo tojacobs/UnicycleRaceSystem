@@ -83,19 +83,23 @@ class RaceSequence:
         if all(endRace):
             self._status = State.RaceFinished
 
-    def processFalseStart(self, data, racer, index):
-        racer.setFalseStart(True)
+    def processFalseStart(self, index):
+        self._racers[index].setFalseStart(True)
+        self.falseStartDetectedCallback(index)
+
+    def processReactionTime(self, data, racer):
         data = data.split(':')[1]
         racer.setReactionTime(float(data) / 1000)
-        self.falseStartDetectedCallback(index)
 
     def processStartClientData(self, data, index):
         self.startSignalDetectedCallback(index)
         if self._status == State.CountingDown:
-            self.processFalseStart(data, self._racers[index], index)
+            self.processReactionTime(data, self._racers[index])
+            self.processFalseStart(index)
         elif self._status == State.RaceStarted:
-            data = data.split(':')[1]
-            self._racers[index].setReactionTime(float(data) / 1000)
+            self.processReactionTime(data, self._racers[index])
+            if self._racers[index].getReactionTimeInMS() < 0:
+                self.processFalseStart(index)
 
     def processFinishClientData(self, data, index):
         self.finishSignalDetectedCallback(index)
