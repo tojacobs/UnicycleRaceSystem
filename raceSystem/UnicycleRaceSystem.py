@@ -1,6 +1,7 @@
 from raceSystem.server import Server
 from raceSystem.raceSequence import RaceSequence
 from raceSystem.terminalUI import TerminalUI
+from raceSystem.trafficLight import testMode
 from _thread import start_new_thread
 
 
@@ -106,7 +107,12 @@ class UnicycleRaceSystem:
 
         for ui in self._UIs:
             start_new_thread(ui.run, ())
-        self._server.run()
+
+        if testMode:
+            start_new_thread(self._server.run, ())
+            self._raceSequence.keepUpdatingTrafficlight()
+        else:
+            self._server.run()
 
 
 if __name__ == '__main__':

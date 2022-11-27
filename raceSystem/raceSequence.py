@@ -217,3 +217,9 @@ class RaceSequence:
         winner = self.determineWinner()
         self.raceEndedCallback(winner)
         start_new_thread(self.startResetTimer, (self._resetTimerSeconds, ))
+
+    def keepUpdatingTrafficlight(self):
+        while not self._exit:
+            time.sleep(0.01)
+            for racer in self._racers:
+                racer.updateTrafficLight()

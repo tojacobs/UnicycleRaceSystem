@@ -1,5 +1,7 @@
 from raceSystem.trafficLight import TrafficLight
 from raceSystem.trafficLight import Color
+from raceSystem.trafficLight import testMode
+from raceSystem.graphicalTrafficlight import GraphicalTrafficLight
 
 
 class Racer:
@@ -11,7 +13,10 @@ class Racer:
         self._finished = False
         self._DNF = False
         self._startLineTimeInMs = None
-        self._light = TrafficLight(GPIORed, GPIOOrange, GPIOGreen)
+        if testMode:
+            self._light = GraphicalTrafficLight("Tom")
+        else:
+            self._light = TrafficLight(GPIORed, GPIOOrange, GPIOGreen)
 
     def reset(self):
         self._startTimeInMs = None
@@ -100,3 +105,6 @@ class Racer:
             return minutes, seconds
         else:
             return 0, 0
+
+    def updateTrafficLight(self):
+        self._light.updateGUI()
