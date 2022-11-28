@@ -1,7 +1,7 @@
-from raceSystem.trafficLight import TrafficLight
-from raceSystem.trafficLight import Color
-from raceSystem.trafficLight import testMode
-from raceSystem.graphicalTrafficlight import GraphicalTrafficLight
+from raceSystem.RPiTrafficLight import RPiTrafficLight
+from raceSystem.RPiTrafficLight import testMode
+from raceSystem.graphicalTrafficLight import GraphicalTrafficLight
+from raceSystem.iTrafficLight import Color
 
 
 class Racer:
@@ -14,9 +14,9 @@ class Racer:
         self._DNF = False
         self._startLineTimeInMs = None
         if testMode:
-            self._light = GraphicalTrafficLight("Tom")
+            self._light = GraphicalTrafficLight(self._name)
         else:
-            self._light = TrafficLight(GPIORed, GPIOOrange, GPIOGreen)
+            self._light = RPiTrafficLight(GPIORed, GPIOOrange, GPIOGreen)
 
     def reset(self):
         self._startTimeInMs = None
@@ -107,4 +107,6 @@ class Racer:
             return 0, 0
 
     def updateTrafficLight(self):
+        """Function to update the graphicalTrafficLight, only used in testMode.
+        This function must be called from the main thread because tkinter does not work with threads."""
         self._light.updateGUI()

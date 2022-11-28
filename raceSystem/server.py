@@ -1,7 +1,7 @@
 import socket
 from _thread import start_new_thread
 import time
-from raceSystem.trafficLight import testMode
+from raceSystem.RPiTrafficLight import testMode
 
 
 class Server:

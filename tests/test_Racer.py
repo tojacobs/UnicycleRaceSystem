@@ -3,12 +3,14 @@ from unittest.mock import Mock
 from unittest.mock import call
 
 from raceSystem.Racer import Racer
-from raceSystem.trafficLight import Color
+from raceSystem.RPiTrafficLight import Color
+from raceSystem.graphicalTrafficLight import GraphicalTrafficLight
 
 
 @pytest.fixture()
 def racer():
     '''Create a new racer object with a new mock for trafficLight'''
+    GraphicalTrafficLight.createWindow = Mock()
     racer = Racer("P1", 0, 0, 0)
     racer._light = Mock()
     return racer

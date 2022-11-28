@@ -5,12 +5,16 @@ from unittest.mock import Mock
 
 from raceSystem.client import Client
 from raceSystem.UnicycleRaceSystem import UnicycleRaceSystem
+from raceSystem.graphicalTrafficLight import GraphicalTrafficLight
 
 
 def test_happyFlowRace():
     # Create the raceSystem with the ui mocked
+    GraphicalTrafficLight.createWindow = Mock()
     raceSystem = UnicycleRaceSystem()
     raceSystem._UIs[0] = Mock()
+    raceSystem._raceSequence._racers[0]._light = Mock()
+    raceSystem._raceSequence._racers[1]._light = Mock()
 
     # Create the 2 clients
     startClient = Client("StartClient", 0, 0, 0)

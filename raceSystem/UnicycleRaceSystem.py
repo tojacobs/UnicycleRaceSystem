@@ -1,7 +1,7 @@
 from raceSystem.server import Server
 from raceSystem.raceSequence import RaceSequence
 from raceSystem.terminalUI import TerminalUI
-from raceSystem.trafficLight import testMode
+from raceSystem.RPiTrafficLight import testMode
 from _thread import start_new_thread
 
 
@@ -108,6 +108,7 @@ class UnicycleRaceSystem:
         for ui in self._UIs:
             start_new_thread(ui.run, ())
 
+        #  In testMode graphical trafficlight is used, updating the graphical must be done from the main thread
         if testMode:
             start_new_thread(self._server.run, ())
             self._raceSequence.keepUpdatingTrafficlight()

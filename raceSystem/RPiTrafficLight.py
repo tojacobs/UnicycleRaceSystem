@@ -1,6 +1,7 @@
-import enum
 import time
 from _thread import start_new_thread
+from raceSystem.iTrafficLight import iTrafficLight
+from raceSystem.iTrafficLight import Color
 try:
     import RPi.GPIO as GPIO  # type: ignore
     testMode = False
@@ -8,13 +9,7 @@ except ModuleNotFoundError:
     testMode = True
 
 
-class Color(enum.IntEnum):
-    Red = 1
-    Orange = 2
-    Green = 3
-
-
-class TrafficLight:
+class RPiTrafficLight(iTrafficLight):
     def __init__(self, GPIORed, GPIOOrange, GPIOGreen):
         self._gpio = {
             Color.Red: GPIORed,
@@ -29,13 +24,11 @@ class TrafficLight:
         self._blinkingActive = False
         self._threadActive = False
         self._blinkingSpeedInSec = 1
-        if not testMode:
-            self.setupGPIO()
+        self.setupGPIO()
 
     def __del__(self):
         self._blinkingActive = False
-        if not testMode:
-            self.cleanUpGPIO()
+        self.cleanUpGPIO()
 
     def setupGPIO(self):
         GPIO.setmode(GPIO.BCM)
@@ -60,12 +53,7 @@ class TrafficLight:
             self._threadActive = True
 
     def setGPIO(self, color, status):
-        if testMode:
-            print(id(self), end=" ")
-            print(color.name, end=" ")
-            print("to {0}".format(status))
-        else:
-            GPIO.output(self._gpio[color], not (status))
+        GPIO.output(self._gpio[color], not (status))
 
     def restoreLightStatusAfterBlinking(self, tempColorStatus):
         for color in self._colorStatus:

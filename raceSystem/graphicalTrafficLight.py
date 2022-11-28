@@ -1,17 +1,12 @@
-import enum
 import time
 from _thread import start_new_thread
 from tkinter import Tk
 from tkinter import Canvas
+from raceSystem.iTrafficLight import iTrafficLight
+from raceSystem.iTrafficLight import Color
 
 
-class Color(enum.IntEnum):
-    Red = 1
-    Orange = 2
-    Green = 3
-
-
-class GraphicalTrafficLight:
+class GraphicalTrafficLight(iTrafficLight):
     def __init__(self, name):
         self._colorStatus = {
             Color.Red: False,
@@ -23,6 +18,7 @@ class GraphicalTrafficLight:
         self._blinkingSpeedInSec = 1
         self._exitThread = False
         self._queue = []
+        self._name = name
         self.createWindow()
 
     def __del__(self):
@@ -32,12 +28,13 @@ class GraphicalTrafficLight:
     def createWindow(self):
         self._window = Tk()
         self._window.title('Trafficlight')
-        self._canvas = Canvas(self._window, width=120, height=330)
-        self._red = self._canvas.create_oval(10, 10, 110, 110,fill='grey')
-        self._orange = self._canvas.create_oval(10, 120, 110, 220,fill='grey')
-        self._green = self._canvas.create_oval(10, 230, 110, 330,fill='grey')
+        self._canvas = Canvas(self._window, width=120, height=340)
+        self._canvas.create_text(60, 10, text=self._name)
+        self._red = self._canvas.create_oval(10, 20, 110, 110, fill='grey')
+        self._orange = self._canvas.create_oval(10, 130, 110, 220, fill='grey')
+        self._green = self._canvas.create_oval(10, 240, 110, 330, fill='grey')
         self._canvas.pack()
-        print("Window created")
+        self._window.update()
 
     def setColor(self, color, on):
         if color == Color.Red:
@@ -55,16 +52,15 @@ class GraphicalTrafficLight:
                 self._canvas.itemconfig(self._green, fill='Green')
             else:
                 self._canvas.itemconfig(self._green, fill='Grey')
+        self._window.update()
 
     def turnOn(self, color):
         self._colorStatus[color] = True
         self._queue.append([color, True])
-        #self.setColor(color, True)
 
     def turnOff(self, color):
         self._colorStatus[color] = False
         self._queue.append([color, False])
-        #self.setColor(color, False)
 
     def setBlinking(self, blinking):
         self._blinkingActive = blinking
@@ -96,5 +92,4 @@ class GraphicalTrafficLight:
     def updateGUI(self):
         while len(self._queue) > 0:
             self.setColor(self._queue[0][0], self._queue[0][1])
-            print("setColor {} to {}".format(self._queue[0][0], self._queue[0][1]))
-            self._queue.pop()
+            self._queue.pop(0)
