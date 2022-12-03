@@ -52,7 +52,6 @@ class GraphicalTrafficLight(iTrafficLight):
                 self._canvas.TKCanvas.itemconfig(self._green, fill='Green')
             else:
                 self._canvas.TKCanvas.itemconfig(self._green, fill='Grey')
-        self._window.refresh()
 
     def turnOn(self, color):
         self._colorStatus[color] = True
@@ -93,3 +92,4 @@ class GraphicalTrafficLight(iTrafficLight):
         while len(self._queue) > 0:
             self.setColor(self._queue[0][0], self._queue[0][1])
             self._queue.pop(0)
+        self._window.refresh()
