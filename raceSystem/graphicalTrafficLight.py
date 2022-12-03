@@ -1,9 +1,12 @@
 import time
 from _thread import start_new_thread
-from tkinter import Tk
-from tkinter import Canvas
+from raceSystem.RPiTrafficLight import testMode
 from raceSystem.iTrafficLight import iTrafficLight
 from raceSystem.iTrafficLight import Color
+
+# Check for testMode in order to not have to install pysimplegui on the RPi's
+if testMode:
+    import PySimpleGUI as sg
 
 
 class GraphicalTrafficLight(iTrafficLight):
@@ -16,43 +19,40 @@ class GraphicalTrafficLight(iTrafficLight):
         self._blinkingActive = False
         self._threadActive = False
         self._blinkingSpeedInSec = 1
-        self._exitThread = False
         self._queue = []
         self._name = name
         self.createWindow()
 
     def __del__(self):
         self._blinkingActive = False
-        self._exitThread = True
 
     def createWindow(self):
-        self._window = Tk()
-        self._window.title('Trafficlight')
-        self._canvas = Canvas(self._window, width=120, height=340)
-        self._canvas.create_text(60, 10, text=self._name)
-        self._red = self._canvas.create_oval(10, 20, 110, 110, fill='grey')
-        self._orange = self._canvas.create_oval(10, 130, 110, 220, fill='grey')
-        self._green = self._canvas.create_oval(10, 240, 110, 330, fill='grey')
-        self._canvas.pack()
-        self._window.update()
+        layout = [[sg.Canvas(size=(120, 340), key='canvas')]]
+        self._window = sg.Window(self._name, layout, finalize=True)
+        self._canvas = self._window['canvas']
+        self._canvas.TKCanvas.create_text(60, 10, text=self._name)
+        self._red = self._canvas.TKCanvas.create_oval(10, 20, 110, 110, fill='grey')
+        self._orange = self._canvas.TKCanvas.create_oval(10, 130, 110, 220, fill='grey')
+        self._green = self._canvas.TKCanvas.create_oval(10, 240, 110, 330, fill='grey')
+        self._window.refresh()
 
     def setColor(self, color, on):
         if color == Color.Red:
             if on:
-                self._canvas.itemconfig(self._red, fill='Red')
+                self._canvas.TKCanvas.itemconfig(self._red, fill='Red')
             else:
-                self._canvas.itemconfig(self._red, fill='Grey')
+                self._canvas.TKCanvas.itemconfig(self._red, fill='Grey')
         if color == Color.Orange:
             if on:
-                self._canvas.itemconfig(self._orange, fill='Orange')
+                self._canvas.TKCanvas.itemconfig(self._orange, fill='Orange')
             else:
-                self._canvas.itemconfig(self._orange, fill='Grey')
+                self._canvas.TKCanvas.itemconfig(self._orange, fill='Grey')
         if color == Color.Green:
             if on:
-                self._canvas.itemconfig(self._green, fill='Green')
+                self._canvas.TKCanvas.itemconfig(self._green, fill='Green')
             else:
-                self._canvas.itemconfig(self._green, fill='Grey')
-        self._window.update()
+                self._canvas.TKCanvas.itemconfig(self._green, fill='Grey')
+        self._window.refresh()
 
     def turnOn(self, color):
         self._colorStatus[color] = True
