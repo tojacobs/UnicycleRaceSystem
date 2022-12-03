@@ -1,9 +1,8 @@
 import socket
-import os
-from _thread import *
+from _thread import start_new_thread
 import time
-import datetime
-from raceSystem.raceSequence import *
+from raceSystem.trafficLight import testMode
+
 
 class Server:
     def __init__(self):
@@ -15,7 +14,7 @@ class Server:
         self._finishLastHeartbeat = 0
         self._exit = False
 
-    def setCallbackFunctions(self, receivedDataCallback, startClientConnectedCallback, 
+    def setCallbackFunctions(self, receivedDataCallback, startClientConnectedCallback,
                              finishClientConnectedCallback, startClientLostCallback, finishClientLostCallback):
         """setCallbackFunctions sets the callback functions that are being used by server"""
         self.receivedDataCallback          = receivedDataCallback
@@ -49,7 +48,7 @@ class Server:
         self._finishClientConnected = False
         self.finishClientLostCallback()
 
-    def recievedHeartBeat(self,data):
+    def recievedHeartBeat(self, data):
         if ("StartClient" in data):
             self._startLastHeartbeat = 0
         elif ("FinishClient" in data):
@@ -71,7 +70,7 @@ class Server:
             else:
                 self._startLastHeartbeat = 0
                 self._finishLastHeartbeat = 0
-            
+
     def multi_threaded_client(self, connection, id):
         while not self._exit:
             try:
@@ -84,7 +83,7 @@ class Server:
                     self.receivedDataCallback(data)
                 data = "Thanks for data"
                 connection.send(data.encode())  # send Thanks for data to the client
-            except:
+            except BrokenPipeError:
                 if (id == self._startClientId):
                     self.startConnectionLost()
                 elif (id == self._finishClientId):
@@ -98,26 +97,24 @@ class Server:
 
     def keepSteadyConnection(self):
         # get the hostname if testmode is active otherwise use real ip
-        # Todo: implement a proper way to get testMode from trafficlight, currently it works because we import everything from raceSequence
-        # which imports everything from trafficLight and testMode is a global in trafficLight
         if testMode:
             host = socket.gethostname()
         else:
             host = "192.168.1.173"
         port = 5000  # initiate port no above 1024
         server_socket = socket.socket()  # get instance
-        server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1) #Allows the socket to forcibly bind to a port in use by another socket
+        # Allow the socket to forcibly bind to a port in use by another socket
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.bind((host, port))  # bind host address and port together
 
         # configure how many clients the server can listen simultaneously
         server_socket.listen(2)
 
-        start_new_thread(self.watchDogHeartbeat,())
+        start_new_thread(self.watchDogHeartbeat, ())
         while not self._exit:
-            time.sleep(0.1) # for cpu usage optimization
+            time.sleep(0.1)  # for cpu usage optimization
             if not self.bothClientsConnected():
                 self.repairConnection(server_socket)
 
     def run(self):
         self.keepSteadyConnection()
-

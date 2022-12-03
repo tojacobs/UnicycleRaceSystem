@@ -1,12 +1,13 @@
 import socket
 import time
 import configparser
-from _thread import *
+from _thread import start_new_thread
 try:
-    import RPi.GPIO as GPIO # type: ignore
+    import RPi.GPIO as GPIO  # type: ignore
     testMode = False
-except:
+except ModuleNotFoundError:
     testMode = True
+
 
 class Client:
     def __init__(self, clientName, GPIOP1, GPIOP2, serverIP):
@@ -21,14 +22,13 @@ class Client:
             self.setupGPIO(GPIOP1, GPIOP2)
 
     def setupGPIO(self, GPIOP1, GPIOP2):
-        # Zet de pinmode op Broadcom SOC.
+        # Switch pinmode to Broadcom SOC and disable warnings
         GPIO.setmode(GPIO.BCM)
-        # Zet waarschuwingen uit.
         GPIO.setwarnings(False)
-        # Zet de GPIO pin als ingang.
+        # set GPIO pins as input
         GPIO.setup(GPIOP1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(GPIOP2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        # Gebruik een interrupt, wanneer actief run subroutinne 'signal_found_p<player>'
+        # Use interrupt, when active run 'signalFoundP<player>'
         GPIO.add_event_detect(GPIOP1, GPIO.RISING, callback=self.signalFoundP1, bouncetime=200)
         GPIO.add_event_detect(GPIOP2, GPIO.RISING, callback=self.signalFoundP2, bouncetime=200)
 
@@ -58,8 +58,8 @@ class Client:
                 clientSocket = self.createSocket()
                 self._connected = True
                 print("Connected")
-            except:
-                time.sleep(1) # Wait 1 sec and try again
+            except ConnectionRefusedError:
+                time.sleep(1)  # Wait 1 sec and try again
         return clientSocket
 
     def getInput(self):
@@ -69,13 +69,13 @@ class Client:
                 self.signalFoundP1(0)
             if userInput == '2':
                 self.signalFoundP2(0)
-            userInput = '' 
+            userInput = ''
 
     def sendMessage(self, clientSocket, message):
         try:
             clientSocket.send(message.encode())  # send message
-            data = clientSocket.recv(1024).decode()  # receive response
-        except:
+            _ = clientSocket.recv(1024).decode()  # receive response
+        except BrokenPipeError:
             print('Lost connection')
             self._connected = False
 
@@ -91,22 +91,23 @@ class Client:
                 clientSocket = self.connectToServer()
                 identificationMessageToServer = self._clientName
                 self.sendMessage(clientSocket, identificationMessageToServer)
-                start_new_thread(self.heartBeat,(clientSocket,))
+                start_new_thread(self.heartBeat, (clientSocket,))
                 if testMode:
-                    start_new_thread(self.getInput,())
+                    start_new_thread(self.getInput, ())
 
             while self._connected:
-                time.sleep(0.01) # for CPU optimization
-                if not self._p1time is None:
+                time.sleep(0.01)  # for CPU optimization
+                if self._p1time is not None:
                     message = "p1" + self._clientName + ":" + self._p1time
                     self.sendMessage(clientSocket, message)
                     self._p1time = None
-                if not self._p2time is None:
+                if self._p2time is not None:
                     message = "p2" + self._clientName + ":" + self._p2time
                     self.sendMessage(clientSocket, message)
                     self._p2time = None
-        
+
         clientSocket.close()  # close the connection
+
 
 def readClientConfig():
     config = configparser.ConfigParser()
@@ -122,6 +123,7 @@ def readClientConfig():
     GPIOP2 = int(config.get('Client', 'gpio_in_p2'))
     serverIp = config.get('Client', 'server_ip')
     return clientName, GPIOP1, GPIOP2, serverIp
+
 
 if __name__ == '__main__':
     clientName, GPIOP1, GPIOP2, serverIp = readClientConfig()

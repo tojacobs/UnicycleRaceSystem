@@ -1,6 +1,6 @@
 import time
 from raceSystem.userInterface import UserInterface
-from _thread import *
+from _thread import start_new_thread
 
 
 class TerminalUI(UserInterface):
@@ -32,7 +32,7 @@ class TerminalUI(UserInterface):
 
     def finishClientConnected(self):
         self._finishClientConnected = True
-        print("FinishClient Connected") 
+        print("FinishClient Connected")
 
     def startClientLost(self):
         self._startClientConnected = False
@@ -57,23 +57,27 @@ class TerminalUI(UserInterface):
     def sendResult(self, index, falseStart, DNF, raceTime, reactionTimeMs):
         if falseStart:
             if DNF:
-                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: DNF,  Valse start" % (self.getNameCallback(index), reactionTimeMs))
+                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: DNF,  Valse start"
+                      % (self.getNameCallback(index), reactionTimeMs))
             else:
                 minutes, seconds = raceTime
-                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: %d:%.3f,  Valse start" % (self.getNameCallback(index), reactionTimeMs, int(minutes), seconds))
+                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: %d:%.3f,  Valse start"
+                      % (self.getNameCallback(index), reactionTimeMs, int(minutes), seconds))
         else:
             if DNF:
-                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: DNF" % (self.getNameCallback(index), reactionTimeMs))
+                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: DNF"
+                      % (self.getNameCallback(index), reactionTimeMs))
             else:
                 minutes, seconds = raceTime
-                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: %d:%.3f" % (self.getNameCallback(index), reactionTimeMs, int(minutes), seconds))
+                print("Resultaten %s: reactietijd: %s Ms,  Racetijd: %d:%.3f"
+                      % (self.getNameCallback(index), reactionTimeMs, int(minutes), seconds))
 
     def startSignalDetected(self, index):
-        #print("Start sensor P%s gedetecteerd" % (index+1))
+        # print("Start sensor P%s gedetecteerd" % (index+1))
         pass
 
     def finishSignalDetected(self, index):
-        #print("Finish sensor P%s gedetecteerd" % (index+1))
+        # print("Finish sensor P%s gedetecteerd" % (index+1))
         pass
 
     def falseStartDetected(self, index):
@@ -99,27 +103,27 @@ class TerminalUI(UserInterface):
 
     def waitForAnswer(self):
         while not self._exit:
-            time.sleep(0.1) # sleep is for CPU optimization
+            time.sleep(0.1)  # sleep is for CPU optimization
             self._answer = input()
 
     def setNames(self):
         try:
             self.setNameCallback(0, input("Geef naam van P1...\n"))
             print("{} Raced als P1".format(self.getNameCallback(0)))
-        except:
+        except SyntaxError:
             print("Ongeldige naam, instelling niet opgeslagen")
         try:
             self.setNameCallback(1, input("Geef naam van P2...\n"))
             print("{} Raced als P2".format(self.getNameCallback(1)))
-        except:
+        except SyntaxError:
             print("Ongeldige naam, instelling niet opgeslagen")
 
     def setCountdown(self):
         try:
-            #TODO countdown mag niet lager zijn dan orangeLightAt
+            # TODO countdown mag niet lager zijn dan orangeLightAt
             self.setCountdownCallback(int(input("Geef aantal seconden...\n")))
             print("countdown ingesteld op {} seconden".format(self.getCountdownCallback()))
-        except:
+        except ValueError:
             print("Ongeldig getal, instelling niet opgeslagen ")
 
     def setOrangeLightAt(self):
@@ -130,13 +134,13 @@ class TerminalUI(UserInterface):
                 print("Oranje licht ingesteld op {} seconden".format(self.getOrangeLightAtCallback()))
             else:
                 print("Oranje licht sec mag niet hoger zijn dan countdown, instelling niet opgeslagen")
-        except:
+        except ValueError:
             print("Ongeldig getal, instelling niet opgeslagen")
 
     def processCommand(self):
-        if   self._answer == "start":
+        if self._answer == "start":
             self._raceFinished = False
-            start_new_thread(self.startRaceCallback,())
+            start_new_thread(self.startRaceCallback, ())
         elif self._answer == "namen":
             self.setNames()
         elif self._answer == "countdown":
@@ -155,7 +159,14 @@ class TerminalUI(UserInterface):
         self._answer = ""
 
     def printHelp(self):
-        print("Mogelijke commando's zijn: \n-'start' Om de countdown te beginnen.\n-'namen' Om namen van Racers in te geven.\n-'countdown' Om aantal sec countdown in te stellen.\n-'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat.\n-'stop' Om de race af te breken, alleen te gebruiken tijdens de race.\n-'exit' Om het programma te sluiten.\n-'help' Om dit bericht te printen")
+        print("Mogelijke commando's zijn: \n\
+-'start' Om de countdown te beginnen.\n\
+-'namen' Om namen van Racers in te geven.\n\
+-'countdown' Om aantal sec countdown in te stellen.\n\
+-'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat.\n\
+-'stop' Om de race af te breken, alleen te gebruiken tijdens de race.\n\
+-'exit' Om het programma te sluiten.\n\
+-'help' Om dit bericht te printen")
 
     def run(self):
         start_new_thread(self.waitForAnswer, ())
@@ -180,6 +191,6 @@ class TerminalUI(UserInterface):
                 self.printHelp()
                 helpPrinted = True
 
-            time.sleep(0.1) # for cpu usage optimization
+            time.sleep(0.1)  # for cpu usage optimization
             if not self._answer == "":
                 self.processCommand()

@@ -1,7 +1,8 @@
 from raceSystem.server import Server
 from raceSystem.raceSequence import RaceSequence
 from raceSystem.terminalUI import TerminalUI
-from _thread import *
+from _thread import start_new_thread
+
 
 class UnicycleRaceSystem:
     def __init__(self):
@@ -90,17 +91,17 @@ class UnicycleRaceSystem:
     def run(self):
         self._raceSequence.setCallbackFunctions(self.countDownStarted, self.countDownEnded, self.raceEnded, self.sendResult,
                                                 self.startSignalDetected, self.finishSignalDetected, self.falseStartDetected)
-        self._server.setCallbackFunctions(self.receivedDataFromServer, self.startClientConnected, self.finishClientConnected, 
+        self._server.setCallbackFunctions(self.receivedDataFromServer, self.startClientConnected, self.finishClientConnected,
                                           self.startClientLost, self.finishClientLost)
         for ui in self._UIs:
             ui.setCallbackFunctions(self.exit, self.startRace, self.stopRace, self.setName, self.getName,
-                                                 self.setCountdown, self.getCountdown, self.setOrangeLightAt, self.getOrangeLightAt)
+                                    self.setCountdown, self.getCountdown, self.setOrangeLightAt, self.getOrangeLightAt)
 
         for ui in self._UIs:
             start_new_thread(ui.run, ())
         self._server.run()
 
+
 if __name__ == '__main__':
     raceSystem = UnicycleRaceSystem()
     raceSystem.run()
-    
