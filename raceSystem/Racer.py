@@ -38,6 +38,9 @@ class Racer:
         self._finishTimeInMs = finishTime
         self._finished = True
 
+    def getFinishTime(self):
+        return self._finishTimeInMs
+
     def setFalseStart(self, falseStart):
         self._falseStart = falseStart
 
@@ -62,6 +65,16 @@ class Racer:
             return int(timeMs)
         else:
             return None
+
+    def setWinner(self, winner):
+        if winner:
+            self._light.turnOn(Color.Green)
+            self._light.turnOff(Color.Red)
+            self._light.turnOff(Color.Orange)
+        else:
+            self._light.turnOff(Color.Green)
+            self._light.turnOn(Color.Red)
+            self._light.turnOff(Color.Orange)
 
     def countDownStarted(self):
         self._light.turnOn(Color.Red)

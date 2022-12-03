@@ -10,18 +10,22 @@ class TerminalUI(UserInterface):
         self._startClientConnected = False
         self._finishClientConnected = False
         self._raceFinished = False
+        self._raceLengthInSec = 15
 
     def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback, setNameCallback, getNameCallback,
-                             setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback):
-        self.exitCallback             = exitCallback
-        self.startRaceCallback        = startRaceCallback
-        self.stopRaceCallback         = stopRaceCallback
-        self.setNameCallback          = setNameCallback
-        self.getNameCallback          = getNameCallback
-        self.setCountdownCallback     = setCountdownCallback
-        self.getCountdownCallback     = getCountdownCallback
-        self.setOrangeLightAtCallback = setOrangeLightAtCallback
-        self.getOrangeLightAtCallback = getOrangeLightAtCallback
+                             setCountdownCallback, getCountdownCallback, setOrangeLightAtCallback, getOrangeLightAtCallback,
+                             setResetTimerSecondsCallback, getResetTimerSecondsCallback):
+        self.exitCallback                 = exitCallback
+        self.startRaceCallback            = startRaceCallback
+        self.stopRaceCallback             = stopRaceCallback
+        self.setNameCallback              = setNameCallback
+        self.getNameCallback              = getNameCallback
+        self.setCountdownCallback         = setCountdownCallback
+        self.getCountdownCallback         = getCountdownCallback
+        self.setOrangeLightAtCallback     = setOrangeLightAtCallback
+        self.getOrangeLightAtCallback     = getOrangeLightAtCallback
+        self.setResetTimerSecondsCallback = setResetTimerSecondsCallback
+        self.getResetTimerSecondsCallback = getResetTimerSecondsCallback
 
     def exit(self):
         self._exit = True
@@ -48,9 +52,10 @@ class TerminalUI(UserInterface):
 
     def countDownEnded(self):
         print("GO!  ")
-        start_new_thread(self.startHintTimer, (15, ))
+        start_new_thread(self.startStopRaceTimer, (self._raceLengthInSec, ))
 
-    def raceEnded(self):
+    def raceEnded(self, winner):
+        print("Winnaar: %s" % winner)
         print("Race gefinished, type een commando...")
         self._raceFinished = True
 
@@ -91,12 +96,13 @@ class TerminalUI(UserInterface):
             time.sleep(1)
             t -= 1
 
-    def startHintTimer(self, t):
+    def startStopRaceTimer(self, t):
         while (t and not self._raceFinished):
             time.sleep(1)
             t -= 1
         if not self._raceFinished:
-            print("Hint: type 'stop' om een DNF aan niet gefinishte rijders te geven en de race te stoppen")
+            print("Race wordt gestopt vanwege de maximale lengte van %s seconden" % self._raceLengthInSec)
+            self.stopRaceCallback()
 
     def bothClientsConnected(self):
         return (self._startClientConnected and self._finishClientConnected)
@@ -137,6 +143,28 @@ class TerminalUI(UserInterface):
         except ValueError:
             print("Ongeldig getal, instelling niet opgeslagen")
 
+    def setMaxRaceLenght(self):
+        try:
+            answer = int(input("Geef aantal seconden...\n"))
+            if answer > 0:
+                self._raceLengthInSec = answer
+                print("Maximale raceduur ingesteld op {} seconden".format(self._raceLengthInSec))
+            else:
+                print("Maximale raceduur mag niet negatief zijn")
+        except ValueError:
+            print("Ongeldig getal, instelling niet opgeslagen")
+
+    def setWinnerIndicationTimer(self):
+        try:
+            answer = int(input("Geef aantal seconden...\n"))
+            if answer > 0:
+                self.setResetTimerSecondsCallback(answer)
+                print("Stoplicht winnaar indicatie tijd ingesteld op {} seconden".format(self.getResetTimerSecondsCallback()))
+            else:
+                print("Stoplicht winnaar indicatie tijd mag niet negatief zijn")
+        except ValueError:
+            print("Ongeldig getal, instelling niet opgeslagen")
+
     def processCommand(self):
         if self._answer == "start":
             self._raceFinished = False
@@ -151,6 +179,10 @@ class TerminalUI(UserInterface):
             self.printHelp()
         elif self._answer == "stop":
             self.stopRaceCallback()
+        elif self._answer == "raceduur":
+            self.setMaxRaceLenght()
+        elif self._answer == "indicatie":
+            self.setWinnerIndicationTimer()
         elif self._answer == "exit":
             print("Programma afsluiten... mocht dit niet werken dan programma sluiten met Ctrl+c")
             self.exitCallback()
@@ -162,9 +194,11 @@ class TerminalUI(UserInterface):
         print("Mogelijke commando's zijn: \n\
 -'start' Om de countdown te beginnen.\n\
 -'namen' Om namen van Racers in te geven.\n\
--'countdown' Om aantal sec countdown in te stellen.\n\
--'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat.\n\
+-'countdown' Om aantal sec countdown in te stellen, default is 4 sec.\n\
+-'oranje' Om aantal sec vóór einde countdown in te stellen waarbij het oranje licht aangaat, default is 2 sec.\n\
 -'stop' Om de race af te breken, alleen te gebruiken tijdens de race.\n\
+-'raceduur' Om de maximale raceduur in te stellen, racers krijgen een DNF na deze tijd, default is 15 sec.\n\
+-'indicatie' Om aantal seconden van de winnaar indicatie op het stoplicht in te stellen, default is 30 sec.\n\
 -'exit' Om het programma te sluiten.\n\
 -'help' Om dit bericht te printen")
 

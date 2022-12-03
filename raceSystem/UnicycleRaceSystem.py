@@ -44,6 +44,12 @@ class UnicycleRaceSystem:
     def getOrangeLightAt(self):
         return self._raceSequence.getOrangeLightAt()
 
+    def setResetTimerSeconds(self, seconds):
+        self._raceSequence.setResetTimerSeconds(seconds)
+
+    def getResetTimerSeconds(self):
+        return self._raceSequence.getResetTimerSeconds()
+
     def startClientConnected(self):
         for ui in self._UIs:
             ui.startClientConnected()
@@ -68,9 +74,9 @@ class UnicycleRaceSystem:
         for ui in self._UIs:
             ui.countDownEnded()
 
-    def raceEnded(self):
+    def raceEnded(self, winner):
         for ui in self._UIs:
-            ui.raceEnded()
+            ui.raceEnded(winner)
 
     def sendResult(self, index, falseStart, DNF, raceTime, reactionTimeMs):
         for ui in self._UIs:
@@ -95,7 +101,8 @@ class UnicycleRaceSystem:
                                           self.startClientLost, self.finishClientLost)
         for ui in self._UIs:
             ui.setCallbackFunctions(self.exit, self.startRace, self.stopRace, self.setName, self.getName,
-                                    self.setCountdown, self.getCountdown, self.setOrangeLightAt, self.getOrangeLightAt)
+                                    self.setCountdown, self.getCountdown, self.setOrangeLightAt, self.getOrangeLightAt,
+                                    self.setResetTimerSeconds, self.getResetTimerSeconds)
 
         for ui in self._UIs:
             start_new_thread(ui.run, ())
