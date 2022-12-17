@@ -34,6 +34,7 @@ class RPiTrafficLight(iTrafficLight):
         GPIO.setmode(GPIO.BCM)
         for output in self._gpio.values():
             GPIO.setup(output, GPIO.OUT)
+            GPIO.output(output, True)
 
     def cleanUpGPIO(self):
         GPIO.cleanup()

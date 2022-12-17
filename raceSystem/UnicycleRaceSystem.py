@@ -3,6 +3,7 @@ from raceSystem.raceSequence import RaceSequence
 from raceSystem.terminalUI import TerminalUI
 from raceSystem.RPiTrafficLight import testMode
 from _thread import start_new_thread
+import subprocess
 
 
 class UnicycleRaceSystem:
@@ -116,6 +117,19 @@ class UnicycleRaceSystem:
             self._server.run()
 
 
+def enablePtpTimesync():
+    timeSyncCommands = [
+        "sudo systemctl stop systemd-timesyncd",
+        "sudo systemctl disable systemd-timesyncd",
+        "sudo iwconfig wlan0 power off",
+        "sudo ptpd -M wlan0"]
+
+    for command in timeSyncCommands:
+        subprocess.run(command.split())
+
+
 if __name__ == '__main__':
+    if not testMode:
+        enablePtpTimesync()
     raceSystem = UnicycleRaceSystem()
     raceSystem.run()

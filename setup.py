@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='raceSystem',
-      version='1.0.0',
+      version='1.1.0',
       description='Unicycle Race System',
       author='Tom Jacobs, Bart Machon',
       license='MIT',
