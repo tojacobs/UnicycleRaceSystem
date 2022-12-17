@@ -217,3 +217,11 @@ class RaceSequence:
         winner = self.determineWinner()
         self.raceEndedCallback(winner)
         start_new_thread(self.startResetTimer, (self._resetTimerSeconds, ))
+
+    def keepUpdatingTrafficlight(self):
+        """Function to update the graphicalTrafficLight, only used in testMode.
+        This function must be called from the main thread because tkinter does not work with threads."""
+        while not self._exit:
+            time.sleep(0.01)
+            for racer in self._racers:
+                racer.updateTrafficLight()
