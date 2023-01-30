@@ -1,6 +1,8 @@
 import socket
 import time
 import configparser
+import subprocess
+import readline  # noqa: F401 This import is magically used, it enabled command line history
 from _thread import start_new_thread
 try:
     import RPi.GPIO as GPIO  # type: ignore
@@ -125,7 +127,20 @@ def readClientConfig():
     return clientName, GPIOP1, GPIOP2, serverIp
 
 
+def enablePtpTimesync():
+    timeSyncCommands = [
+        "sudo systemctl stop systemd-timesyncd",
+        "sudo systemctl disable systemd-timesyncd",
+        "sudo iwconfig wlan0 power off",
+        "sudo ptpd -s wlan0"]
+
+    for command in timeSyncCommands:
+        subprocess.run(command.split())
+
+
 if __name__ == '__main__':
+    if not testMode:
+        enablePtpTimesync()
     clientName, GPIOP1, GPIOP2, serverIp = readClientConfig()
     print("Starting %s" % (clientName))
     client = Client(clientName, GPIOP1, GPIOP2, serverIp)

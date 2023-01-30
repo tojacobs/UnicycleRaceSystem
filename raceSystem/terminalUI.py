@@ -1,4 +1,5 @@
 import time
+import readline  # noqa: F401 This import is magically used, it enabled command line history
 from raceSystem.userInterface import UserInterface
 from _thread import start_new_thread
 
@@ -9,7 +10,7 @@ class TerminalUI(UserInterface):
         self._exit = False
         self._startClientConnected = False
         self._finishClientConnected = False
-        self._raceFinished = False
+        self._raceOngoing = False
         self._raceLengthInSec = 15
 
     def setCallbackFunctions(self, exitCallback, startRaceCallback, stopRaceCallback, setNameCallback, getNameCallback,
@@ -56,8 +57,9 @@ class TerminalUI(UserInterface):
 
     def raceEnded(self, winner):
         print("Winnaar: %s" % winner)
+        print("#########################################################################")
         print("Race gefinished, type een commando...")
-        self._raceFinished = True
+        self._raceOngoing = False
 
     def sendResult(self, index, falseStart, DNF, raceTime, reactionTimeMs):
         if falseStart:
@@ -97,10 +99,10 @@ class TerminalUI(UserInterface):
             t -= 1
 
     def startStopRaceTimer(self, t):
-        while (t and not self._raceFinished):
+        while (t and self._raceOngoing):
             time.sleep(1)
             t -= 1
-        if not self._raceFinished:
+        if self._raceOngoing:
             print("Race wordt gestopt vanwege de maximale lengte van %s seconden" % self._raceLengthInSec)
             self.stopRaceCallback()
 
@@ -119,8 +121,12 @@ class TerminalUI(UserInterface):
         except SyntaxError:
             print("Ongeldige naam, instelling niet opgeslagen")
         try:
-            self.setNameCallback(1, input("Geef naam van P2...\n"))
-            print("{} Raced als P2".format(self.getNameCallback(1)))
+            p2name = input("Geef naam van P2...\n")
+            if p2name != self.getNameCallback(0):
+                self.setNameCallback(1, p2name)
+                print("{} Raced als P2".format(self.getNameCallback(1)))
+            else:
+                print("Namen mogen niet hetzelfde zijn, instelling niet opgeslagen")
         except SyntaxError:
             print("Ongeldige naam, instelling niet opgeslagen")
 
@@ -165,9 +171,11 @@ class TerminalUI(UserInterface):
         except ValueError:
             print("Ongeldig getal, instelling niet opgeslagen")
 
-    def processCommand(self):
-        if self._answer == "start":
-            self._raceFinished = False
+    def processCommand(self):  # noqa: C901 complexity for this function is too high but in this case it's ok.
+        if self._raceOngoing and self._answer in {"start", "namen", "countdown", "oranje", "raceduur", "indicatie"}:
+            print("De race is al begonnen, u kunt dit commando nu niet gebruiken")
+        elif self._answer == "start":
+            self._raceOngoing = True
             start_new_thread(self.startRaceCallback, ())
         elif self._answer == "namen":
             self.setNames()
@@ -175,14 +183,14 @@ class TerminalUI(UserInterface):
             self.setCountdown()
         elif self._answer == "oranje":
             self.setOrangeLightAt()
-        elif self._answer == "help":
-            self.printHelp()
-        elif self._answer == "stop":
-            self.stopRaceCallback()
         elif self._answer == "raceduur":
             self.setMaxRaceLenght()
         elif self._answer == "indicatie":
             self.setWinnerIndicationTimer()
+        elif self._answer == "help":
+            self.printHelp()
+        elif self._answer == "stop":
+            self.stopRaceCallback()
         elif self._answer == "exit":
             print("Programma afsluiten... mocht dit niet werken dan programma sluiten met Ctrl+c")
             self.exitCallback()

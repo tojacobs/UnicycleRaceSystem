@@ -64,7 +64,8 @@ class RaceSequence:
 
     def stopRace(self):
         """stopRace is a callback function that will be called from UnicycleRaceSystem"""
-        self._stop = True
+        if not self._status == State.RaceFinished:
+            self._stop = True
 
     def setResetTimerSeconds(self, seconds):
         """setOrangeLightAt is a callback function that will be called from UnicycleRaceSystem"""
@@ -151,34 +152,29 @@ class RaceSequence:
             racer.reset()
 
     def determineWinner(self):
+        p1 = self._racers[0]
+        p2 = self._racers[1]
         winner = None
-        p1PossibleWinner = False
-        p2PossibleWinner = False
-        if not (self._racers[0].getFalseStart() or self._racers[0].getDNF()):
-            p1PossibleWinner = True
-        if not (self._racers[1].getFalseStart() or self._racers[1].getDNF()):
-            p2PossibleWinner = True
 
-        if p1PossibleWinner and not p2PossibleWinner:
-            winner = self._racers[0].getName()
-            self._racers[0].setWinner(True)
-            self._racers[1].setWinner(False)
-        elif p2PossibleWinner and not p1PossibleWinner:
-            winner = self._racers[1].getName()
-            self._racers[0].setWinner(False)
-            self._racers[1].setWinner(True)
-        elif p1PossibleWinner and p2PossibleWinner:
-            if self._racers[0].getFinishTime() < self._racers[1].getFinishTime():
-                winner = self._racers[0].getName()
-                self._racers[0].setWinner(True)
-                self._racers[1].setWinner(False)
+        if p1.getFalseStart() or p1.getDNF():
+            # p1 is disqualified so p2 wins if they are not disqualified
+            if p2.getFalseStart() or p2.getDNF():
+                # both are disqualified so there is no winner
+                winner = None
             else:
-                winner = self._racers[1].getName()
-                self._racers[0].setWinner(False)
-                self._racers[1].setWinner(True)
+                # p2 is the winner
+                winner = p2.getName()
         else:
-            self._racers[0].setWinner(False)
-            self._racers[1].setWinner(False)
+            # p1 is not disqualified so they win if p2 is disqualified or if they have a shorter race time
+            if p2.getFalseStart() or p2.getDNF() or p1.getFinishTime() < p2.getFinishTime():
+                # p1 is the winner
+                winner = p1.getName()
+            else:
+                # p2 is the winner
+                winner = p2.getName()
+
+        p1.setWinner(winner == p1.getName())
+        p2.setWinner(winner == p2.getName())
         return winner
 
     def startResetTimer(self, t):
