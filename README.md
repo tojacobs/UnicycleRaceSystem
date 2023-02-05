@@ -26,6 +26,7 @@ The Server RPi has all the intelligence. Once a start race command is given to t
 
 Download the [zip with source code](https://github.com/tojacobs/UnicycleRaceSystem/archive/refs/heads/main.zip) extract it and copy it to the RPi's.
 Use the terminal to navigate to the directory on the RPi and run "pip install -e ."
+For the RPi's to be able to synchronize their clocks PTPd must be installed, make sure the RPi's have a connection to internet and run "pip install ptpd". For the rest of the steps or running the system a connection to internet is NOT required.
 
 client_config.txt is being used to configure the client RPi's and has to be placed in the same directory as the client.py file (UnicycleRaceSystem-main/raceSystem), inside the client_config.txt you'll find the following information:
 ```c
@@ -55,6 +56,7 @@ Good to know:
 
 Download de [zip met de broncode](https://github.com/tojacobs/UnicycleRaceSystem/archive/refs/heads/main.zip) pak deze uit en zet de uitgepakte map op de RPi's.
 Navigeer naar de map op de RPi en run "pip install -e ."
+Om de tijd op de RPi's te synchronizeren is PTPd nodig, zorg ervoor dat de RPi's verbonden zijn met internet en voer het volgende commondo uit op iederen RPi "pip install ptpd". Voor de rest van de steppen en het draaien van het systeem is geen verbinding met internet nodig.
 
 client_config.txt wordt gebruikt door de client RPi's om de configuratie uit te halen en moet in dezelfde directory staan als de client.py file (UnicycleRaceSystem-main/raceSystem), de client_config.txt file ziet er als volgt uit:
 ```c
@@ -79,3 +81,19 @@ Na het opstarten van server.py zal hij wachten op connectie met de clients, als 
 Good to know:
 - als server connectie verliest met 1 van de client wordt dit weergegeven en gewacht tot er weer connectie is.
 - als server.py wordt afgesloten (ctr+c of exit typen) en de clients nog draaien dan zullen deze automatisch opnieuw connecten als de server weer opgestart is.
+
+## How to run the system on Windows/Linux for testing purposes
+
+Make sure that [python](https://www.python.org/downloads/) (minimum version 3.6) is installed on your system and be sure to check both check marks at the bottem of the screenshot.
+
+![python](https://user-images.githubusercontent.com/25977592/216842764-970be332-f630-4b3e-87fc-e8c62e5347c4.png)
+
+After the installation open the terminal or windows powershell and run "pip install pysimplegui". 
+On Windows you also need to install pyreadline3 "pip install pyreadline3".
+
+Download the [zip with source code](https://github.com/tojacobs/UnicycleRaceSystem/archive/refs/heads/main.zip) and extract it.
+On Windows: Double click the run_manual_test_windows.bat in the UnicycleRaceSystem-main/tests directory. On Linux: Open the UnicycleRaceSystem-main/tests directory in a terminal and run run_manual_test_linux.sh.
+5 windows will pop up, like in the screen recording below where a good weather race sequence is being executed:
+
+https://user-images.githubusercontent.com/25977592/216845608-2929228a-6660-4994-837d-5b7133dce9c3.mp4
+
