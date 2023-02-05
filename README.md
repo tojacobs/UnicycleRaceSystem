@@ -1,5 +1,28 @@
 # UnicycleRaceSystem
-Time registration system for off road unicycle races
+This is a time registration system that is being used for off the road motorized unicycle races.
+
+## The system in action
+
+
+https://user-images.githubusercontent.com/25977592/216837483-07cedbf8-91b6-4362-8520-1f61adebfadd.mp4
+
+
+## How it works
+The system consists out of 3 RPI's (Raspberry Pi's) that communicate wireless with each other.
+- A start client, to detect reaction time and false starts.
+- A finish client, to detect finish times.
+- A server, which holds all intelligence and controls the traffic light.
+
+A laptop is used to connect to the Server RPi (f.e. using Putty) to control the system and view the results.
+
+Once the system is started the RPi's use PTPd (a program based on the Precision Time Protocol) to synchronize their clocks. This was tested on Wifi to have a precision of under 10ms.
+
+The clients are designed to be dumb, when they get an input signel they save the timestamp and send that with their ID to the Server RPi.
+
+The Server RPi has all the intelligence. Once a start race command is given to the Server RPi the countdown will start and it will control the traffic light. From that point on the Server RPi will register reaction times, if the reaction time is negative then false start is registered. Once the finish times are received the Server RPi will determine the winner and display the race results. The maximum race lenght is 15 seconds, if there's no finish time within the race lenght the racer will get a Did Not Finish (DNF).
+![UnicycleRaceSystem](https://user-images.githubusercontent.com/25977592/216837506-96f3ac52-bd92-461d-938b-90dc4f2dd586.png)
+
+## How to run the system on Raspberry Pi's
 
 De volgende bestanden moeten op de stoplicht pi worden gezet op dezelfde locatie:
 - server.py
