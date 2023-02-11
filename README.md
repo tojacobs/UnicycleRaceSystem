@@ -88,12 +88,57 @@ Make sure that [python](https://www.python.org/downloads/) (minimum version 3.6)
 
 ![python](https://user-images.githubusercontent.com/25977592/216842764-970be332-f630-4b3e-87fc-e8c62e5347c4.png)
 
-After the installation open the terminal or windows powershell and run "pip install pysimplegui". 
+After the installation open the terminal or windows powershell and run "pip install pysimplegui".  
 On Windows you also need to install pyreadline3 "pip install pyreadline3".
 
-Download the [zip with source code](https://github.com/tojacobs/UnicycleRaceSystem/archive/refs/heads/main.zip) and extract it.
-On Windows: Double click the run_manual_test_windows.bat in the UnicycleRaceSystem-main/tests directory. On Linux: Open the UnicycleRaceSystem-main/tests directory in a terminal and run run_manual_test_linux.sh.
+Download the [zip with source code](https://github.com/tojacobs/UnicycleRaceSystem/archive/refs/heads/main.zip) and extract it.  
+On Windows: Double click the run_manual_test_windows.bat in the UnicycleRaceSystem-main/tests directory.  
+On Linux: Open the UnicycleRaceSystem-main/tests directory in a terminal and run run_manual_test_linux.sh.  
 5 windows will pop up, like in the screen recording below where a good weather race sequence is being executed:
 
 https://user-images.githubusercontent.com/25977592/216845608-2929228a-6660-4994-837d-5b7133dce9c3.mp4
 
+## The software architecture
+
+The software design was made with the MVP pattern in mind. UnicycleRaceSystem.py is the entry point of the program and serves as the presenter (or abstraction layer) between UserInterface, Server and RaceSequence.  
+This way the classes UserInterface, Server and RaceSequence are completely loose coupled from eachother, which makes it easy to refactor, maintain, test or even swap the classes for others. It even makes it possible to have multiple UI's without the Server or RaceSequence classes being aware of it.
+
+It was chosen not to save the UnicycleRaceSystem instance in the UserInterface, Server and RaceSequence classes because that would allow those classes to call all functions available on the UnicycleRaceSystem instance. This could cause problems when functions are called that were not meant to be called from that class. For example RaceSequence callling exit and shutting down the whole system or Server calling stopRace without UserInterface being aware of it.  
+To prevent this it was chosen to use callback functions. In the UnicycleRaceSystem class functions are declared that are used as callback functions. UserInterface, Server and RaceSequence each have a set of these functions that they can use, given to them by the "setCallBackFunctions()" function.  
+Take for example the "receivedDataFromServer()" function:  
+A handle to this function is send to the Server class by calling the "setCallBackFunctions()" function by UnicycleRaceSystem upon starting the system. The Server instance saves the handle to that function as "receivedDataCallback()" and calls it when it received data from one of the clients. The UnicycleRaceSystem will then call "raceSequence.processReceivedData()".
+
+### Class Diagram
+For readability of the class diagram it was chosen not to display the callback functions of UnicycleRacesystem.
+
+![CladdDiagram](https://user-images.githubusercontent.com/25977592/218262803-f02e2bff-b987-4de7-ba2a-5c536a8eedfc.jpg)
+
+In a future refactor iTrafficlight will be discoupled from the Racer class and will instead be controlled by the RaceSequence class. This will be done in order to adhere to the loose coupling, high cohesion and single responsibility principles and use the advantages they bring.
+
+### Sequence Diagrams
+To give an idea of the flow of functions calls a few sequence diagrams were made.  
+
+![happyFlowConnectionSequence](https://user-images.githubusercontent.com/25977592/218266283-12266f2a-d7ac-4cf7-9f92-5a2841872686.png)
+
+![startExitSequence](https://user-images.githubusercontent.com/25977592/218266303-21469c39-f1c2-476e-8771-6add26a54c84.png)
+
+![happyFlowRaceSequence](https://user-images.githubusercontent.com/25977592/218266310-f42d9f57-9a46-404a-9c3a-17086f134a03.png)
+
+## Continues Integration
+
+For continues integration Github Actions is used. Each time a Pull request to main is made and when a Pull request to main was merged the pipeline will run.
+
+### Static code checker / Linter
+As linter flake8 was chosen which uses pycodestyle, pyflakes and mccabe.  
+A check is done on all the possible checks excluding E221 (multiple spaces before operator). if any of the checks fail the pipeline build will fail.  
+The maximum code complexity is set to 10 and the maximum line lenght to 127 (Github editor width).
+
+### Unit tests
+For unit tests pytest and unittest.mock from the standard python library are used. Classes are tested in isolation, any dependencies are mocked.
+At the moment only the class Racer.py has unit tests, the goal is to write unit tests for all classes.
+
+### Integration tests
+For Integration tests also pytest and unittest.mock from the standard python library are used (or misused hehe).  
+In the integration tests 2 clients and a server are started with all UserInterface elements mocked. The clients will connect to the server so these tests  cover the client socket implementation and the communication between the UnicycleRaceSystem, Server, RaceSequence and Racer classes.  
+By calling the UnicycleRaceSystem "startRace()" and clients "singalFound()" functions a happy or unhappy race flow can be created. By asserting the data that is being send to the mocked UserInterface the race result can be checked for correctness.  
+At the moment there is only 1 integration test with a happy flow sequence. After all unit tests have been written it will be assessed which integration tests are needed to be added.
