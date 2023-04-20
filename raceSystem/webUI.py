@@ -43,13 +43,14 @@ class WebIU(UserInterface):
                 
             return self.homePage()
 
-        @self._app.route("/raceControl", methods=['GET', 'POST'])
+        @self._app.route("/raceControl", methods=['POST'])
         def raceControl():
             if request.method == 'POST':
                 if request.form.get('btnStart') == 'Start':
                     self.startRaceCallback()
                 elif  request.form.get('btnStop') == 'Stop':
                     self.stopRaceCallback()
+            return '', 204
 
         @self._app.route('/settings',methods = ['POST', 'GET'])
         def settings():
