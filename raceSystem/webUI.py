@@ -51,6 +51,17 @@ class WebIU(UserInterface):
                 elif  request.form.get('btnStop') == 'Stop':
                     self.stopRaceCallback()
             return '', 204
+        
+        @self._app.route("/setNames", methods=['POST', 'GET'])
+        def setNames():
+            if request.method == 'POST':
+                self.setNameCallback(0,request.form.get('Naam_1'))
+                self.setNameCallback(1,request.form.get('Naam_2'))
+
+            name1 = self.getNameCallback(0)
+            name2 = self.getNameCallback(1)
+            
+            return render_template("home.html", name_1 = name1 + " ", name_2 = name2 + " ")
 
         @self._app.route('/settings',methods = ['POST', 'GET'])
         def settings():

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .title_name{
+            float: left;
+        }
+        .input_name{
+            width: 100%;
+        }
+        #borderNames{
+            position: relative;
+            border: 1px solid black;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <form action="/setNames" method="post">
+        <div id="borderNames">
+            <H2 style="margin-left: 5px;">Namen</H2>
+            <table>
+            <tr>
+                <th><p class="title_name">Baan 1</p></th>
+                <td><input class="input_name" type="text" name="Naam_1" value={{name_1}}/></td>
+            </tr>
+            <tr>
+                <th><p class="title_name">Baan 2</p></th>
+                <td><input class="input_name" type="text" name="Naam_2" value={{name_2}}/></td>
+            </tr>
+            </table>
+            
+            <input id="btnSaveNames" type="submit" value="Opslaan"/>
+        </div>
+    </form>
+</body>

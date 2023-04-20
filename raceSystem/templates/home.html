@@ -9,18 +9,8 @@
   <br>
   {% include 'raceControl.html' %}
 
-	<form method="post" action="">
-    <table>
-      <tr>
-        <th><p>Baan 1</p></th>
-        <td><input type="text" name="Naam_1" value={{name_1}}/></td>
-      </tr>
-      <tr>
-        <th><p>Baan 2</p></th>
-        <td><input type="text" name="Naam_2" value={{name_2}}/></td>
-      </tr>
-    </table>
-  </form>
+	{% include 'names.html' %}
+
     <label for="Startclient">Start client</label>
     <input type="checkbox" name="StartClient" value="StartClient" {{ "checked" if StartClient else "" }}/>
     <br>
