@@ -2,6 +2,21 @@
 <html>
 <head>
   <title>Unicycle race system</title>
+  <script>
+    function receivedStatus(xStartClientConnected,xFinishClientConnected){
+      updateClientConnectionStatus(xStartClientConnected, xFinishClientConnected)
+    }
+
+    setInterval(function(){
+        fetch('/get-status')
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(data) {
+          receivedStatus(data.xStartClientConnected, data.xFinishClientConnected);
+        });
+      }, 1000);
+  </script>
 </head>
 <body>
   <a href="settings" target="_blank">Instellingen</a>

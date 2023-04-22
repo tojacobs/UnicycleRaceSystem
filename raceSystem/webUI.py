@@ -89,6 +89,11 @@ class WebIU(UserInterface):
                 return render_template("settings.html",countdownValue=countdown, orangeValue=orange)
                 pass
 
+        @self._app.route('/get-status')
+        def getStatus():
+            print(self._startClientConnected)
+            print(self._finishClientConnected)
+            return jsonify(xStartClientConnected=self._startClientConnected, xFinishClientConnected=self._finishClientConnected)
 
         self._app.run(debug=True, use_reloader=False)
 

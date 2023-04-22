@@ -7,14 +7,37 @@
             width: 100%;
         }
     </style>
+
+    <script>
+        function updateClientConnectionStatus(xStartClientConnected,xFinishClientConnected){
+                var startClientText = document.getElementById("startClientConnectionState");
+                var finishClientText = document.getElementById("finishClientConnectionState");
+                
+                if (xStartClientConnected){
+                startClientText.style.backgroundColor = "lightgreen"
+                startClientText.innerHTML = "Connected"
+                }else{
+                startClientText.style.backgroundColor = "red"
+                startClientText.innerHTML = "Disconnected"
+                }
+
+                if (xFinishClientConnected){
+                finishClientText.style.backgroundColor = "lightgreen"
+                finishClientText.innerHTML = "Connected"
+                }else{
+                finishClientText.style.backgroundColor = "red"
+                finishClientText.innerHTML = "Disconnected"
+                }
+            }
+    </script>
 </head>
 <body>
     <div id="borderClients">
         <H2>Clients</H2>
         <label for="Startclient">Start client</label>
-        <input type="checkbox" name="StartClient" value="StartClient" {{ "checked" if StartClient else "" }}/>
+        <p id="startClientConnectionState">Unknow</p>
         <br>
         <label for="Finishclient">Finish client</label>
-        <input type="checkbox" name="FinshClient" value="FinshClient" {{ "checked" if FinshClient else "" }}/>
+        <p id="finishClientConnectionState">Unknow</p>
     </div>
 </body>
