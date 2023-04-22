@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        #borderClients{
+            border: 1px solid black;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="borderClients">
+        <H2>Clients</H2>
+        <label for="Startclient">Start client</label>
+        <input type="checkbox" name="StartClient" value="StartClient" {{ "checked" if StartClient else "" }}/>
+        <br>
+        <label for="Finishclient">Finish client</label>
+        <input type="checkbox" name="FinshClient" value="FinshClient" {{ "checked" if FinshClient else "" }}/>
+    </div>
+</body>

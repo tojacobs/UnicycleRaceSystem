@@ -11,11 +11,8 @@
 
 	{% include 'names.html' %}
 
-    <label for="Startclient">Start client</label>
-    <input type="checkbox" name="StartClient" value="StartClient" {{ "checked" if StartClient else "" }}/>
-    <br>
-    <label for="Finishclient">Finish client</label>
-    <input type="checkbox" name="FinshClient" value="FinshClient" {{ "checked" if FinshClient else "" }}/>
+  {% include 'clients.html' %}
+    
 </body>
 </html>
 
