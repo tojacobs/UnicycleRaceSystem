@@ -2,9 +2,12 @@
 <html>
 <head>
   <title>Unicycle race system</title>
+  <style>
+  </style>
   <script>
-    function receivedStatus(xStartClientConnected,xFinishClientConnected){
+    function receivedStatus(xStartClientConnected,xFinishClientConnected,sRaceStatus){
       updateClientConnectionStatus(xStartClientConnected, xFinishClientConnected)
+      updateRaceStatus(sText = sRaceStatus)
     }
 
     setInterval(function(){
@@ -13,7 +16,7 @@
           return response.json();
         })
         .then(function(data) {
-          receivedStatus(data.xStartClientConnected, data.xFinishClientConnected);
+          receivedStatus(data.xStartClientConnected, data.xFinishClientConnected,data.sRaceStatus);
         });
       }, 1000);
   </script>
@@ -24,7 +27,7 @@
   <br>
   {% include 'raceControl.html' %}
 
-	{% include 'names.html' %}
+  {% include 'names.html' %}
 
   {% include 'clients.html' %}
     

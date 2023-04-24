@@ -9,6 +9,7 @@ class WebIU(UserInterface):
         self._app = Flask(__name__)
         self._startClientConnected = False
         self._finishClientConnected = False
+        self._raceStatus = ''
 
 
     def homePage(self):
@@ -91,9 +92,8 @@ class WebIU(UserInterface):
 
         @self._app.route('/get-status')
         def getStatus():
-            print(self._startClientConnected)
-            print(self._finishClientConnected)
-            return jsonify(xStartClientConnected=self._startClientConnected, xFinishClientConnected=self._finishClientConnected)
+            print(self._raceStatus)
+            return jsonify(xStartClientConnected=self._startClientConnected, xFinishClientConnected=self._finishClientConnected, sRaceStatus=self._raceStatus)
 
         self._app.run(debug=True, use_reloader=False)
 
@@ -133,12 +133,15 @@ class WebIU(UserInterface):
         pass
     def countDownStarted(self):
         """Callback function that will be called from UnicycleRaceSystem"""
+        self._raceStatus = 'Countdown gestart'
         pass
     def countDownEnded(self):
         """Callback function that will be called from UnicycleRaceSystem"""
+        self._raceStatus = 'Countdown beëindigd'
         pass
     def raceEnded(self, winner):
         """Callback function that will be called from UnicycleRaceSystem"""
+        self._raceStatus = 'Race geëindigd'
         pass
     def sendResult(self, index:int, falseStart:bool, DNF:bool, raceTime:tuple, reactionTimeMs:int):
         """Callback function that will be called from UnicycleRaceSystem"""
