@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Unicycle race system</title>
+</head>
+<body>
+  <a href="settings" target="_blank">Instellingen</a>
+  <br>
+  <br>
+  <form action="/raceControl" method="post">
+    <input type="submit" value="Start" name="btnStart"/>
+    <input type="submit" value="Stop" name="btnStop"/>
+  </form>
+	<form method="post" action="">
+    <table>
+      <tr>
+        <th><p>Baan 1</p></th>
+        <td><input type="text" name="Naam_1" value={{name_1}}/></td>
+      </tr>
+      <tr>
+        <th><p>Baan 2</p></th>
+        <td><input type="text" name="Naam_2" value={{name_2}}/></td>
+      </tr>
+    </table>
+  </form>
+    <label for="Startclient">Start client</label>
+    <input type="checkbox" name="StartClient" value="StartClient" {{ "checked" if StartClient else "" }}/>
+    <br>
+    <label for="Finishclient">Finish client</label>
+    <input type="checkbox" name="FinshClient" value="FinshClient" {{ "checked" if FinshClient else "" }}/>
+</body>
+</html>
+
