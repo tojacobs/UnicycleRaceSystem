@@ -10,38 +10,17 @@ class WebIU(UserInterface):
         self._startClientConnected = False
         self._finishClientConnected = False
         self._raceStatus = ''
-
+        self._raceResult = ['','']
 
     def homePage(self):
         name1 = self.getNameCallback(0)
         name2 = self.getNameCallback(1)
-        if self._startClientConnected:
-            sClient = "Connected"
-        else:
-            sClient = ""
-        if self._finishClientConnected:
-            fClient = "Connected"
-        else:
-            fClient = ""
-        return render_template("home.html", name_1 = name1 + " ", name_2 = name2 + " ", StartClient = sClient, FinshClient = fClient)
+        return render_template("home.html", name_1 = name1 + " ", name_2 = name2 + " ")
 
     def run(self):
         """Start the user interface"""
         @self._app.route("/", methods=['GET', 'POST'])
         def index():
-            if request.method == 'POST':
-                try:
-                    self.setNameCallback(0,request.form['Naam_1'])
-                except:
-                    return '<p>Baan 1: ongeldige naam</p>'
-
-                try:
-                    self.setNameCallback(1,request.form['Naam_2'])
-                except:
-                    return '<p>Baan 2: ongeldige naam</p>'
-            elif request.method == 'GET':
-                return self.homePage()
-                
             return self.homePage()
 
         @self._app.route("/raceControl", methods=['POST'])
@@ -51,18 +30,15 @@ class WebIU(UserInterface):
                     self.startRaceCallback()
                 elif  request.form.get('btnStop') == 'Stop':
                     self.stopRaceCallback()
-            return '', 204
-        
+            return '', 204      
+            
         @self._app.route("/setNames", methods=['POST', 'GET'])
         def setNames():
             if request.method == 'POST':
                 self.setNameCallback(0,request.form.get('Naam_1'))
                 self.setNameCallback(1,request.form.get('Naam_2'))
 
-            name1 = self.getNameCallback(0)
-            name2 = self.getNameCallback(1)
-            
-            return render_template("home.html", name_1 = name1 + " ", name_2 = name2 + " ")
+            return self.homePage()
 
         @self._app.route('/settings',methods = ['POST', 'GET'])
         def settings():
@@ -92,8 +68,8 @@ class WebIU(UserInterface):
 
         @self._app.route('/get-status')
         def getStatus():
-            print(self._raceStatus)
-            return jsonify(xStartClientConnected=self._startClientConnected, xFinishClientConnected=self._finishClientConnected, sRaceStatus=self._raceStatus)
+            return jsonify(xStartClientConnected=self._startClientConnected, xFinishClientConnected=self._finishClientConnected, 
+                           sRaceStatus=self._raceStatus, sRaceResult_1=self._raceResult[0], sRaceResult_2=self._raceResult[1])
 
         self._app.run(debug=True, use_reloader=False)
 
@@ -134,6 +110,7 @@ class WebIU(UserInterface):
     def countDownStarted(self):
         """Callback function that will be called from UnicycleRaceSystem"""
         self._raceStatus = 'Countdown gestart'
+        self._raceResult = ['', '']
         pass
     def countDownEnded(self):
         """Callback function that will be called from UnicycleRaceSystem"""
@@ -141,11 +118,22 @@ class WebIU(UserInterface):
         pass
     def raceEnded(self, winner):
         """Callback function that will be called from UnicycleRaceSystem"""
-        self._raceStatus = 'Race geëindigd'
+        self._raceStatus = 'Race geëindigd. De winnaar is: %s' % winner
         pass
     def sendResult(self, index:int, falseStart:bool, DNF:bool, raceTime:tuple, reactionTimeMs:int):
-        """Callback function that will be called from UnicycleRaceSystem"""
-        pass
+        if falseStart:
+            if DNF:
+                self._raceResult[index] = "Reactietijd: %s Ms\nRacetijd: DNF\nValse start" % (reactionTimeMs)
+            else:
+                minutes, seconds = raceTime
+                self._raceResult[index] = "Reactietijd: %s Ms\nRacetijd: %d:%.3f\nValse start" % (reactionTimeMs, int(minutes), seconds)
+        else:
+            if DNF:
+                self._raceResult[index] = "Reactietijd: %s Ms\nRacetijd: DNF" % (reactionTimeMs)
+            else:
+                minutes, seconds = raceTime
+                self._raceResult[index] = "Reactietijd: %s Ms\nRacetijd: %d:%.3f" % (reactionTimeMs, int(minutes), seconds)
+                
     def startSignalDetected(self, index:int):
         """Callback function that will be called from UnicycleRaceSystem"""
         pass
