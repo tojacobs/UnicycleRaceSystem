@@ -4,7 +4,7 @@ from raceSystem.terminalUI import TerminalUI
 from raceSystem.RPiTrafficLight import testMode
 from _thread import start_new_thread
 import subprocess
-
+from raceSystem.webUI import WebIU
 
 class UnicycleRaceSystem:
     def __init__(self):
@@ -12,6 +12,7 @@ class UnicycleRaceSystem:
         self._raceSequence = RaceSequence()
         self._server = Server()
         self._UIs.append(TerminalUI())
+        self._UIs.append(WebIU())
 
     def exit(self):
         self._raceSequence.exit()
