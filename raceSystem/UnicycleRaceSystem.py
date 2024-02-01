@@ -6,6 +6,7 @@ from _thread import start_new_thread
 import subprocess
 from raceSystem.webUI import WebIU
 
+
 class UnicycleRaceSystem:
     def __init__(self):
         self._UIs = []
