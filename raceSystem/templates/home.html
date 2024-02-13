@@ -84,6 +84,7 @@
     
   </style>
   <script>
+    //Update the race result objects
     function updateRaceResult(sRaceResult_1,sRaceResult_2){
       var raceResult_1 = document.getElementById("raceResult_1")
       var raceResult_2 = document.getElementById("raceResult_2")
@@ -92,12 +93,16 @@
       raceResult_2.innerHTML = sRaceResult_2
     }
 
+    //Handle the recived status data
     function receivedStatus(xStartClientConnected,xFinishClientConnected,sRaceStatus,sRaceResult_1,sRaceResult_2){
       updateClientConnectionStatus(xStartClientConnected, xFinishClientConnected)
       updateRaceStatus(sText = sRaceStatus)
       updateRaceResult(sRaceResult_1,sRaceResult_2)
     }
 
+    // Set up a repeated execution of a fetch function
+    // The function fetches the system status from the web server (Flask)
+    // and passes the retrieved data to the 'receivedStatus' function.
     setInterval(function(){
         fetch('/get-status')
         .then(function(response) {
