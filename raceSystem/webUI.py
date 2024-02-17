@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 from raceSystem.userInterface import UserInterface
 from raceSystem.RPiTrafficLight import testMode
-
+import time
+from _thread import start_new_thread
 
 
 class WebIU(UserInterface):
@@ -11,6 +12,8 @@ class WebIU(UserInterface):
         self._finishClientConnected = False
         self._raceStatus = ''
         self._raceResult = ['', '']
+        self._raceOngoing = False
+        self._raceLengthInSec = 15
 
     def run(self):
         """Start the user interface"""
@@ -45,6 +48,7 @@ class WebIU(UserInterface):
         def raceControl():
             if request.method == 'POST':
                 if request.form.get('btnStart') == 'Start':
+                    self._raceOngoing = True
                     self.startRaceCallback()
                 elif request.form.get('btnStop') == 'Stop':
                     self.stopRaceCallback()
@@ -160,11 +164,13 @@ class WebIU(UserInterface):
     def countDownEnded(self):
         """Callback function that will be called from UnicycleRaceSystem"""
         self._raceStatus = 'Countdown beëindigd'
+        start_new_thread(self.startStopRaceTimer, (self._raceLengthInSec, ))
         pass
 
     def raceEnded(self, winner):
         """Callback function that will be called from UnicycleRaceSystem"""
         self._raceStatus = 'Race geëindigd. De winnaar is: %s' % winner
+        self._raceOngoing = False
         pass
 
     def sendResult(
@@ -200,3 +206,11 @@ class WebIU(UserInterface):
     def falseStartDetected(self, index):
         """Callback function that will be called from UnicycleRaceSystem"""
         pass
+
+    def startStopRaceTimer(self, t):
+        while (t and self._raceOngoing):
+            time.sleep(1)
+            t -= 1
+        if self._raceOngoing:
+            self._raceStatus = "Race wordt gestopt vanwege de maximale lengte van %s seconden" % self._raceLengthInSec
+            self.stopRaceCallback()
