@@ -103,6 +103,7 @@
     // Set up a repeated execution of a fetch function
     // The function fetches the system status from the web server (Flask)
     // and passes the retrieved data to the 'receivedStatus' function.
+    const refreshRateInMs = 1000; 
     setInterval(function(){
         fetch('/get-status')
         .then(function(response) {
@@ -111,7 +112,7 @@
         .then(function(data) {
           receivedStatus(data.xStartClientConnected, data.xFinishClientConnected,data.sRaceStatus,data.sRaceResult_1,data.sRaceResult_2);
         });
-      }, 1000);
+      }, refreshRateInMs);
   </script>
 </head>
 <body>
