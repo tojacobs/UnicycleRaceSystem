@@ -1,6 +1,7 @@
 :: this script must be executed from the Test directory
 cd ../
 pip install Flask
+pip install pyreadline3
 pip install -e .
 cd tests/
 copy client_config_finish.txt client_config.txt
