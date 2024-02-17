@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from raceSystem.userInterface import UserInterface
+from raceSystem.RPiTrafficLight import testMode
+
 
 
 class WebIU(UserInterface):
@@ -13,7 +15,7 @@ class WebIU(UserInterface):
     def run(self):
         """Start the user interface"""
         self.setupFlaskRouting()
-        self._app.run(debug=True, use_reloader=False)
+        self.startFlask()
 
     def setupFlaskRouting(self):
         self.homePage()
@@ -21,6 +23,12 @@ class WebIU(UserInterface):
         self.formNames()
         self.settingsPage()
         self.statusRequest()
+
+    def startFlask(self):
+        if testMode:
+            self._app.run(debug=True, use_reloader=False)
+        else:
+            self._app.run(host= '192.168.1.173', port=9000, debug=False, use_reloader=False)
 
     def homePage(self):
         @self._app.route("/", methods=['GET', 'POST'])
