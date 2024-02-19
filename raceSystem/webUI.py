@@ -28,10 +28,11 @@ class WebIU(UserInterface):
         self.statusRequest()
 
     def startFlask(self):
+        port = 80
         if testMode:
-            self._app.run(debug=True, use_reloader=False)
+            self._app.run(port=port, debug=True, use_reloader=False)
         else:
-            self._app.run(host= '192.168.1.173', port=9000, debug=False, use_reloader=False)
+            self._app.run(host= '192.168.1.173', port=port, debug=True, use_reloader=False)
 
     def homePage(self):
         @self._app.route("/", methods=['GET', 'POST'])
