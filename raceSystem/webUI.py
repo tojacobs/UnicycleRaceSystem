@@ -56,13 +56,13 @@ class WebIU(UserInterface):
             return '', 204
 
     def formNames(self):
-        @self._app.route("/setNames", methods=['POST', 'GET'])
+        @self._app.route("/setNames", methods=['GET', 'POST'])
         def setNames():
             if request.method == 'POST':
                 self.setNameCallback(0, request.form.get('Naam_1'))
                 self.setNameCallback(1, request.form.get('Naam_2'))
 
-            return self.homePage()
+            return '', 204
 
     def statusRequest(self):
         @self._app.route('/get-status')
