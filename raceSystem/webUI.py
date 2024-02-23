@@ -5,6 +5,7 @@ import time
 from _thread import start_new_thread
 import logging
 
+
 class WebIU(UserInterface):
     def __init__(self) -> None:
         self._app = Flask(__name__)
@@ -28,13 +29,13 @@ class WebIU(UserInterface):
         self.statusRequest()
 
     def startFlask(self):
-        logging.getLogger('werkzeug').setLevel(logging.ERROR) #Reduce Flask logging to only error messages
+        logging.getLogger('werkzeug').setLevel(logging.ERROR)  # Reduce Flask logging to only error messages
 
         port = 80
         if testMode:
             self._app.run(port=port, debug=True, use_reloader=False)
         else:
-            self._app.run(host= '192.168.1.173', port=port, debug=True, use_reloader=False)
+            self._app.run(host='192.168.1.173', port=port, debug=True, use_reloader=False)
 
     def homePage(self):
         @self._app.route("/", methods=['GET', 'POST'])
