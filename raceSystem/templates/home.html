@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Unicycle race system</title>
+  <style>
+    #leftBanner{
+      position: relative;
+      float: left;
+      height: 100%;
+      width: 15%;
+    }
+    #frameTracks{
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
+    #rightBanner{
+      float: right;
+      height: 100%;
+      width: 15%;
+    }
+    #track_1{
+      position: relative;
+      float: left;
+      left:10px;
+      border: 3px solid black;
+      width: 33%;
+      height: 600px;
+      margin-top: 25px;
+      margin-bottom: 25px;
+      text-align: center;   /*cemter text horizontal*/
+      line-height: 600px;   /*center text vertical*/
+      font-size: 30px;      /*text size*/
+    }
+    #startLine_1{
+      position: absolute;
+      bottom: 15px;
+      border: 2px dotted red;
+      width: 100%;
+      height: 10px;
+    }
+    #finishLine_1{
+      position: absolute;
+      top:      15px;
+      border:   2px dotted rgb(4, 0, 255);
+      width: 100%;
+      height: 10px;
+    }
+    #track_2{
+      position: relative;
+      float: right;
+      right:20px;
+      border: 3px solid black;
+      width: 33%;
+      height: 600px;
+      margin-top: 25px;
+      margin-bottom: 25px;
+      text-align: center;   /*cemter text horizontal*/
+      line-height: 600px;   /*center text vertical*/
+      font-size: 30px;      /*text size*/
+    }
+    #startLine_2{
+      position: absolute;
+      bottom: 15px;
+      border: 2px dotted red;
+      width: 100%;
+      height: 10px;
+    }
+    #finishLine_2{
+      position: absolute;
+      top:      15px;
+      border:   2px dotted rgb(4, 0, 255);
+      width: 100%;
+      height: 10px;
+    }
+
+    .raceResult{
+      position: absolute;
+      top:20%;
+      width: 100%;
+      height: 80%;
+      font-size: medium;
+    }
+    
+  </style>
+  <script>
+    //Update the race result objects
+    function updateRaceResult(sRaceResult_1,sRaceResult_2){
+      var raceResult_1 = document.getElementById("raceResult_1")
+      var raceResult_2 = document.getElementById("raceResult_2")
+
+      raceResult_1.innerHTML = sRaceResult_1
+      raceResult_2.innerHTML = sRaceResult_2
+    }
+
+    //Handle the recived status data
+    function receivedStatus(xStartClientConnected,xFinishClientConnected,sRaceStatus,sRaceResult_1,sRaceResult_2){
+      updateClientConnectionStatus(xStartClientConnected, xFinishClientConnected)
+      updateRaceStatus(sText = sRaceStatus)
+      updateRaceResult(sRaceResult_1,sRaceResult_2)
+    }
+
+    // Set up a repeated execution of a fetch function
+    // The function fetches the system status from the web server (Flask)
+    // and passes the retrieved data to the 'receivedStatus' function.
+    const refreshRateInMs = 1000; 
+    setInterval(function(){
+        fetch('/get-status')
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(data) {
+          receivedStatus(data.xStartClientConnected, data.xFinishClientConnected,data.sRaceStatus,data.sRaceResult_1,data.sRaceResult_2);
+        });
+      }, refreshRateInMs);
+  </script>
+</head>
+<body>
+  <a href="settings" target="_blank">Instellingen</a>
+  <br>
+  <br>
+  <div id="leftBanner">
+    {% include 'names.html' %}
+
+    {% include 'clients.html' %}
+  </div>
+  <div id="rightBanner">
+    {% include 'raceControl.html' %}
+  </div>
+  
+  <div id="frameTracks">
+    <div id="track_1">
+      <div id="finishLine_1"></div>
+      Track 1
+      <p id="raceResult_1" class="raceResult">Race resultaat baan 1</p>
+      <div id="startLine_1"></div>
+    </div>
+
+    <div id="track_2">
+      <div id="finishLine_2"></div>
+      Track 2
+      <p id="raceResult_2" class="raceResult">Race resultaat baan 1</p>
+      <div id="startLine_2"></div>
+    </div>
+  </div>
+</body>
+</html>
+

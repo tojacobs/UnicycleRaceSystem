@@ -1,5 +1,6 @@
 # this script must be executed from the Test directory
 cd ../
+pip install Flask
 pip install -e .
 cd tests/
 cp client_config_finish.txt client_config.txt
