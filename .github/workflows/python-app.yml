@@ -28,6 +28,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest pysimplegui Flask
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        export DISPLAY=:0.0
         pip install -e .
     - name: Lint with flake8
       run: |
